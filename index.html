@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sony J S D — Structural Engineer</title>
+  <meta name="description" content="Professional portfolio: bridges, inspections, structural design, and engineering tools." />
+  <style>
+    :root{
+      --bg: #0b1220;
+      --card: rgba(255,255,255,0.08);
+      --card2: rgba(255,255,255,0.06);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.70);
+      --line: rgba(255,255,255,0.14);
+      --accent: #7dd3fc; /* change accent color here */
+      --accent2:#a78bfa;
+      --shadow: 0 24px 60px rgba(0,0,0,.45);
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(1000px 600px at 20% 10%, rgba(125,211,252,.22), transparent 60%),
+        radial-gradient(900px 500px at 80% 20%, rgba(167,139,250,.20), transparent 55%),
+        radial-gradient(1200px 800px at 50% 100%, rgba(34,197,94,.10), transparent 60%),
+        var(--bg);
+      min-height:100vh;
+    }
+    a{ color:inherit; text-decoration:none; }
+    a:hover{ text-decoration:underline; text-underline-offset:3px; }
+
+    .wrap{ max-width: 1050px; margin: 0 auto; padding: 28px 18px 56px; }
+    .topbar{
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 10px 4px 18px;
+    }
+    .brand{
+      display:flex; gap:10px; align-items:center; font-weight:700; letter-spacing:.2px;
+    }
+    .dot{
+      width:10px; height:10px; border-radius:50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      box-shadow: 0 0 0 6px rgba(125,211,252,.10);
+    }
+    .nav{ display:flex; gap:14px; flex-wrap:wrap; }
+    .nav a{ color:var(--muted); font-size:14px; padding:6px 10px; border-radius:999px; border:1px solid transparent; }
+    .nav a:hover{ border-color: var(--line); background: rgba(255,255,255,0.04); text-decoration:none; }
+
+    .hero{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 18px;
+      align-items:stretch;
+      margin-top: 10px;
+    }
+    @media (max-width: 900px){
+      .hero{ grid-template-columns:1fr; }
+    }
+
+    .panel{
+      background: linear-gradient(180deg, var(--card), var(--card2));
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 22px;
+      backdrop-filter: blur(10px);
+    }
+
+    .kicker{
+      display:inline-flex; gap:8px; align-items:center;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      border-radius:999px;
+      padding: 6px 10px;
+      font-size: 13px;
+      background: rgba(255,255,255,0.04);
+    }
+    h1{
+      margin: 14px 0 8px;
+      font-size: 38px;
+      line-height:1.06;
+      letter-spacing:-.6px;
+    }
+    .sub{
+      color: var(--muted);
+      font-size: 16px;
+      line-height:1.55;
+      margin: 0 0 16px;
+    }
+
+    .ctaRow{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 12px; }
+    .btn{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      font-weight:600;
+      font-size: 14px;
+      text-decoration:none;
+    }
+    .btn:hover{ background: rgba(255,255,255,0.10); text-decoration:none; }
+    .btn.primary{
+      border: none;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color:#071022;
+    }
+
+    .pillRow{ display:flex; flex-wrap:wrap; gap:8px; margin-top: 14px; }
+    .pill{
+      font-size: 13px;
+      color: rgba(255,255,255,0.82);
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+    }
+
+    .sideTitle{ font-weight:700; margin:0 0 10px; }
+    .list{ margin:0; padding-left: 16px; color: var(--muted); line-height:1.7; }
+    .list li{ margin: 6px 0; }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 18px;
+    }
+    @media (max-width: 900px){ .grid{ grid-template-columns:1fr; } }
+
+    .card{
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      background: rgba(255,255,255,0.04);
+    }
+    .card h3{ margin: 0 0 8px; font-size: 16px; }
+    .card p{ margin:0; color: var(--muted); line-height:1.55; font-size:14px; }
+
+    .section{
+      margin-top: 22px;
+    }
+    .sectionHeader{
+      display:flex; align-items:flex-end; justify-content:space-between; gap:10px; flex-wrap:wrap;
+      margin-bottom: 10px;
+    }
+    .sectionHeader h2{
+      margin:0; font-size: 20px;
+      letter-spacing: -.2px;
+    }
+    .sectionHeader .hint{ color: var(--muted); font-size: 13px; }
+
+    .twoCol{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 900px){ .twoCol{ grid-template-columns:1fr; } }
+
+    .footer{
+      margin-top: 22px;
+      color: var(--muted);
+      font-size: 13px;
+      text-align:center;
+      opacity: .9;
+    }
+    .mini{
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .tag{
+      display:inline-block;
+      font-size: 12px;
+      padding: 4px 8px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.03);
+      color: rgba(255,255,255,0.78);
+      margin-left: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand"><span class="dot"></span> Sony J S D</div>
+      <div class="nav">
+        <a href="#about">About</a>
+        <a href="#work">Work</a>
+        <a href="#articles">Articles</a>
+        <a href="#tools">Tools</a>
+        <a href="#contact">Contact</a>
+      </div>
+    </div>
+
+    <div class="hero">
+      <div class="panel" id="about">
+        <div class="kicker">Structural Engineer • Bridges • Inspection • Digital Workflows</div>
+        <h1>Hi, I’m Sony J S D.</h1>
+        <p class="sub">
+          I work on bridge engineering, design review, inspections, and structural health monitoring.
+          I’m also building simple web-based tools for engineers—calculators, document helpers, and automation.
+        </p>
+
+        <div class="ctaRow">
+          <a class="btn primary" href="#contact">Contact</a>
+          <a class="btn" href="#" title="Replace with your PDF link">Download CV</a>
+          <a class="btn" href="#tools">View Tools</a>
+        </div>
+
+        <div class="pillRow">
+          <span class="pill">Bridge Design & Review</span>
+          <span class="pill">Load Testing</span>
+          <span class="pill">NDT & Inspections</span>
+          <span class="pill">SHM</span>
+          <span class="pill">STAAD / MIDAS / SOFiSTiK</span>
+          <span class="pill">Rhino + Grasshopper</span>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <h3>Focus</h3>
+            <p>RC and steel bridges, diagnostics, rehabilitation inputs, and performance monitoring.</p>
+          </div>
+          <div class="card">
+            <h3>What I’m building</h3>
+            <p>Engineering web tools (free to use), dashboards, and AI-assisted document search for codes/manuals.</p>
+          </div>
+          <div class="card">
+            <h3>Open to collaboration</h3>
+            <p>Bridge inspection workflows, parametric modeling, and practical automation for engineering teams.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3 class="sideTitle">Quick info</h3>
+        <ul class="list">
+          <li>Role: Structural Engineer (Government of Kerala)</li>
+          <li>Location: Kerala, India</li>
+          <li>Experience: 15+ years</li>
+          <li>Interests: BrIM/BIM, parametric modeling, automation</li>
+        </ul>
+
+        <div class="section" id="work">
+          <div class="sectionHeader">
+            <h2>Recent work <span class="tag">sample</span></h2>
+            <div class="hint">Replace these with your real projects</div>
+          </div>
+          <div class="card">
+            <h3>Bridge inspection & rehabilitation support</h3>
+            <p>Field instrumentation, observations, and technical review inputs for repair/rehabilitation proposals.</p>
+          </div>
+          <div class="card" style="margin-top:12px;">
+            <h3>Design review & analysis support</h3>
+            <p>Reviewing structural models and reports for bridge components, bearings, foundations, and staging.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="articles">
+      <div class="sectionHeader">
+        <h2>Articles & notes</h2>
+        <div class="hint">Link PDFs, posts, or Google Drive files</div>
+      </div>
+      <div class="twoCol">
+        <div class="panel">
+          <h3 style="margin:0 0 10px;">Featured</h3>
+          <ul class="list">
+            <li><a href="#">EN 1504 — practical summary notes</a></li>
+            <li><a href="#">IRC live loads — quick reference for footbridges</a></li>
+            <li><a href="#">Curved steel box girder — design considerations</a></li>
+          </ul>
+          <div class="mini" style="margin-top:10px;">Tip: you can later convert this into a blog section.</div>
+        </div>
+        <div class="panel">
+          <h3 style="margin:0 0 10px;">Downloads</h3>
+          <ul class="list">
+            <li><a href="#">Portfolio (PDF)</a></li>
+            <li><a href="#">Selected drawings / sample outputs</a></li>
+            <li><a href="#">Training materials / presentations</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="tools">
+      <div class="sectionHeader">
+        <h2>Tools (coming soon)</h2>
+        <div class="hint">Your future calculators & STAAD helpers</div>
+      </div>
+      <div class="twoCol">
+        <div class="panel">
+          <h3 style="margin:0 0 8px;">STAAD .ANL → Beam As Layout</h3>
+          <p class="sub" style="margin:0;">
+            Upload a STAAD analysis report and generate a beam layout with required steel area (As) at
+            midspan and supports, plus a schedule (CSV).
+          </p>
+          <div class="ctaRow">
+            <a class="btn" href="#">Try (soon)</a>
+            <a class="btn" href="#">Read about the method</a>
+          </div>
+        </div>
+        <div class="panel">
+          <h3 style="margin:0 0 8px;">Code & Manual Assistant</h3>
+          <p class="sub" style="margin:0;">
+            Search and answer questions from selected reference documents with citation-style output.
+          </p>
+          <div class="mini" style="margin-top:10px;">(Will connect to your VPS backend later.)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="contact">
+      <div class="sectionHeader">
+        <h2>Contact</h2>
+        <div class="hint">Replace links below</div>
+      </div>
+      <div class="panel">
+        <p class="sub" style="margin-top:0;">
+          If you’d like to discuss bridge engineering, inspections, digital workflows, or collaboration on tools:
+        </p>
+        <div class="ctaRow">
+          <a class="btn primary" href="mailto:YOUR.EMAIL@example.com">Email</a>
+          <a class="btn" href="https://www.linkedin.com/in/YOUR-LINKEDIN/" target="_blank" rel="noreferrer">LinkedIn</a>
+          <a class="btn" href="https://github.com/YOUR-GITHUB" target="_blank" rel="noreferrer">GitHub</a>
+        </div>
+        <div class="mini" style="margin-top:10px;">© <span id="y"></span> Sony J S D</div>
+      </div>
+    </div>
+
+    <div class="footer">
+      Built with simple HTML/CSS. Hosted anywhere (GitHub Pages / VPS). Clean, fast, and easy to maintain.
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("y").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
