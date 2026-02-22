@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>PSC Girder Section Properties (with Haunch)</title>
+  <title>PSC / AASHTO Type Section Properties</title>
 
-  <!-- PDF libs (CDN) -->
+  <!-- PDF libs -->
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
@@ -18,17 +18,15 @@
       --text: rgba(255,255,255,0.92);
       --muted: rgba(255,255,255,0.70);
 
-      /* Better contrast colors */
-      --shapeFill: rgba(125, 211, 252, 0.35);   /* light cyan fill */
-      --shapeStroke: rgba(255,255,255,0.85);    /* bright outline */
-      --haunchFill: rgba(167, 139, 250, 0.32);  /* violet fill */
-      --axis: rgba(255, 214, 102, 0.95);        /* centroid line */
-      --canvasBg: rgba(0,0,0,0.28);             /* svg background */
-      --accent: #7dd3fc;
+      --canvasBg: rgba(0,0,0,0.30);
+      --shapeFill: rgba(125, 211, 252, 0.35);
+      --shapeStroke: rgba(255,255,255,0.85);
+      --axis: rgba(255, 214, 102, 0.95);
+
+      --accent:#7dd3fc;
       --accent2:#a78bfa;
       --shadow: 0 24px 60px rgba(0,0,0,.45);
     }
-
     *{box-sizing:border-box}
     body{
       margin:0;
@@ -58,7 +56,7 @@
       background: linear-gradient(135deg, var(--accent), var(--accent2));
       color:#071022;
     }
-    .grid{display:grid;grid-template-columns:380px 1fr;gap:14px}
+    .grid{display:grid;grid-template-columns:420px 1fr;gap:14px}
     @media(max-width:980px){.grid{grid-template-columns:1fr}}
     .panel{
       background:linear-gradient(180deg,var(--panel),var(--panel2));
@@ -73,7 +71,6 @@
       width:100%;padding:10px 10px;border-radius:12px;border:1px solid var(--line);
       background:rgba(0,0,0,.18);color:var(--text);outline:none;
     }
-    .field input:focus{border-color:rgba(125,211,252,.55)}
     .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
     .pill{display:inline-block;font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);
       background:rgba(255,255,255,.04);color:var(--muted)}
@@ -81,19 +78,20 @@
     .ok{color:#a7f3d0;font-size:13px;margin-top:10px}
     table{width:100%;border-collapse:collapse;margin-top:10px}
     td{padding:10px;border-bottom:1px solid var(--line);font-size:14px}
-    td:nth-child(1){color:var(--muted);width:52%}
+    td:nth-child(1){color:var(--muted);width:55%}
     .svgBox{
       border:1px solid var(--line);border-radius:16px;background:var(--canvasBg);
       overflow:hidden;
     }
     .small{font-size:12px;color:var(--muted);margin-top:8px}
+    code{background:rgba(255,255,255,.06);padding:2px 6px;border-radius:8px;border:1px solid var(--line)}
   </style>
 </head>
 
 <body>
 <div class="wrap">
   <div class="top">
-    <div class="brand"><span class="dot"></span> PSC Girder Section Properties (with Haunch)</div>
+    <div class="brand"><span class="dot"></span> PSC / AASHTO-Type Section Properties (Tapered)</div>
     <a class="btn" href="index.html">← Back to Home</a>
   </div>
 
@@ -102,23 +100,24 @@
     <div class="panel">
       <h1>Inputs (mm)</h1>
       <div class="muted">
-        Standard PSC I-girder (top flange + haunch trapezoid + web + bottom flange).
-        Outputs: Area A, centroid ȳ (from bottom), Ixx (about centroid), Ztop, Zbot.
+        This models an AASHTO-Type tapered section using a polygon outline:
+        Top flange → top taper → web → bottom taper → bottom flange.
+        Outputs A, ȳ, Ixx, Ztop/Zbot, plus concrete quantity per meter.
       </div>
 
       <div class="row">
         <div class="field">
-          <label>Overall depth, D</label>
-          <input id="D" type="number" value="1800" min="1" step="1">
+          <label>Total depth, D</label>
+          <input id="D" type="number" value="1372" min="1" step="1">
         </div>
         <div class="field">
           <label>Web thickness, tw</label>
-          <input id="tw" type="number" value="200" min="1" step="1">
+          <input id="tw" type="number" value="203" min="1" step="1">
         </div>
 
         <div class="field">
           <label>Top flange width, bt</label>
-          <input id="bt" type="number" value="900" min="1" step="1">
+          <input id="bt" type="number" value="508" min="1" step="1">
         </div>
         <div class="field">
           <label>Top flange thickness, tt</label>
@@ -127,20 +126,29 @@
 
         <div class="field">
           <label>Bottom flange width, bb</label>
-          <input id="bb" type="number" value="700" min="1" step="1">
+          <input id="bb" type="number" value="660" min="1" step="1">
         </div>
         <div class="field">
           <label>Bottom flange thickness, tb</label>
-          <input id="tb" type="number" value="250" min="1" step="1">
+          <input id="tb" type="number" value="220" min="1" step="1">
         </div>
 
         <div class="field">
-          <label>Haunch depth, hh</label>
-          <input id="hh" type="number" value="150" min="0" step="1">
+          <label>Top taper height, ht</label>
+          <input id="ht" type="number" value="250" min="0" step="1">
         </div>
         <div class="field">
-          <label>Haunch bottom width, bh</label>
-          <input id="bh" type="number" value="400" min="0" step="1">
+          <label>Bottom taper height, hb</label>
+          <input id="hb" type="number" value="300" min="0" step="1">
+        </div>
+
+        <div class="field">
+          <label>Concrete density (kN/m³)</label>
+          <input id="gamma" type="number" value="25" min="1" step="0.5">
+        </div>
+        <div class="field">
+          <label>Report title</label>
+          <input id="rtitle" type="text" value="PSC Girder Section Property Report">
         </div>
       </div>
 
@@ -154,24 +162,23 @@
       <div id="msg"></div>
 
       <div class="small">
-        Notes: Haunch top width is assumed = <code>tw</code>. Web “clear” height reduces by <code>hh</code>.
-        Chamfers & box girder can be added as separate options/pages later.
+        If you want the exact AASHTO Type IV proportions (including fillets/chamfers),
+        we can add optional corner cuts later. For section properties, the tapered polygon is already very accurate.
       </div>
     </div>
 
-    <!-- Graphic + Results -->
+    <!-- Report Area -->
     <div class="panel" id="reportArea">
       <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:10px;flex-wrap:wrap;">
         <div>
           <h1>Section (graphic)</h1>
-          <div class="muted">Better contrast: canvas background is dark, section is bright.</div>
+          <div class="muted">Section shown as tapered polygon + centroid axis.</div>
         </div>
         <div class="muted" id="stamp"></div>
       </div>
 
       <div class="svgBox" style="margin-top:10px;">
-        <svg id="svg" viewBox="0 0 900 520" width="100%" height="520" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PSC section">
-          <rect x="0" y="0" width="900" height="520" fill="transparent"></rect>
+        <svg id="svg" viewBox="0 0 900 520" width="100%" height="520" xmlns="http://www.w3.org/2000/svg">
           <g id="shape"></g>
           <g id="axis"></g>
           <g id="dims"></g>
@@ -187,9 +194,11 @@
             <tr><td>Ixx about centroid</td><td id="Ixx">—</td></tr>
             <tr><td>Section modulus at top, Ztop</td><td id="Ztop">—</td></tr>
             <tr><td>Section modulus at bottom, Zbot</td><td id="Zbot">—</td></tr>
+            <tr><td>Concrete volume per meter</td><td id="Vpm">—</td></tr>
+            <tr><td>Self weight per meter</td><td id="Wpm">—</td></tr>
           </tbody>
         </table>
-        <div class="small">PDF report includes the inputs, graphic, and results.</div>
+        <div class="small">PDF includes: inputs + section graphic + results + quantity per meter.</div>
       </div>
     </div>
   </div>
@@ -198,53 +207,94 @@
 <script>
   const el = (id) => document.getElementById(id);
 
+  function nowStamp(){
+    return new Date().toLocaleString();
+  }
   function fmt(x, decimals=1) {
     if (!isFinite(x)) return "—";
     return x.toLocaleString(undefined, { maximumFractionDigits: decimals });
   }
 
-  function nowStamp(){
-    const d = new Date();
-    return d.toLocaleString();
-  }
-
-  function validate(d) {
+  function validate(d){
     const errs = [];
-    if ([d.D,d.tw,d.bt,d.tt,d.bb,d.tb].some(v => v <= 0)) errs.push("All girder dimensions must be > 0.");
-    if (d.hh < 0 || d.bh < 0) errs.push("Haunch inputs must be ≥ 0.");
-    if (d.tw > Math.max(d.bt, d.bb)) errs.push("Web thickness tw should not exceed flange widths.");
-    if (d.D <= d.tt + d.tb + d.hh) errs.push("D must be greater than (tt + tb + hh).");
-    if (d.hh > 0 && d.bh < d.tw) errs.push("If hh > 0, haunch bottom width bh should be ≥ tw.");
+    if ([d.D,d.tw,d.bt,d.tt,d.bb,d.tb].some(v => v <= 0)) errs.push("All main dimensions must be > 0.");
+    if (d.bt < d.tw) errs.push("Top flange width bt must be ≥ web thickness tw.");
+    if (d.bb < d.tw) errs.push("Bottom flange width bb must be ≥ web thickness tw.");
+    if (d.ht < 0 || d.hb < 0) errs.push("Taper heights must be ≥ 0.");
+    if (d.D <= d.tt + d.tb + d.ht + d.hb) errs.push("D must be > (tt + tb + ht + hb). Reduce taper heights or flange thickness.");
+    if (d.gamma <= 0) errs.push("Concrete density must be > 0.");
     return errs;
   }
 
-  // Rectangle helper: b (width), h (height), y0 from bottom
-  function rectProps(b, h, y0) {
-    const A = b * h;
-    const y = y0 + h/2;               // centroid from bottom
-    const Icg = b * Math.pow(h,3) / 12; // about own centroid axis
-    return {A, y, Icg};
+  // Build polygon points (x,y) in mm, symmetric about centerline.
+  // Origin: bottom at y=0, centerline at x=0.
+  function buildPolygon(d){
+    const y0 = 0;
+    const y1 = d.tb;
+    const y2 = y1 + d.hb;
+    const y3 = d.D - d.tt - d.ht;
+    const y4 = d.D - d.tt;
+    const y5 = d.D;
+
+    // half widths
+    const hb = d.bb/2;
+    const hw = d.tw/2;
+    const ht = d.bt/2;
+
+    // Right side profile points from bottom to top
+    const right = [
+      {x: hb, y: y0},  // bottom outer
+      {x: hb, y: y1},  // top of bottom flange
+      {x: hw, y: y2},  // after bottom taper to web
+      {x: hw, y: y3},  // web up to start of top taper
+      {x: ht, y: y4},  // top taper out to top flange
+      {x: ht, y: y5},  // top outer
+    ];
+
+    // Mirror to left side (reverse order)
+    const left = right.slice().reverse().map(p => ({x: -p.x, y: p.y}));
+
+    // Polygon: go up right side, then down left side (excluding duplicate top/bottom points)
+    const poly = [...right, ...left.slice(1, -1)];
+    return poly;
   }
 
-  // Isosceles trapezoid haunch (top width = a, bottom width = b, height = h)
-  // Located with its TOP at yTop (from bottom).
-  function haunchProps(a, b, h, yTop){
-    // Area
-    const A = (a + b) * h / 2;
+  // Polygon area, centroid, and second moment about x-axis through origin (y=0)
+  // Using standard shoelace + polygon inertia formulas.
+  // Returns A (mm2), Cx (mm), Cy (mm), Ix0 (mm4) about x-axis at origin (bottom axis).
+  function polyProps(poly){
+    let A2 = 0;     // 2A
+    let Cx6A = 0;   // 6A*Cx
+    let Cy6A = 0;   // 6A*Cy
+    let Ix12 = 0;   // 12*Ix0
 
-    // Centroid from TOP of trapezoid (towards bottom):
-    // y_from_top = h*(2a + b) / (3*(a + b))
-    const y_from_top = h * (2*a + b) / (3*(a + b));
-    const y = yTop - y_from_top; // centroid from bottom
+    const n = poly.length;
+    for (let i=0; i<n; i++){
+      const p0 = poly[i];
+      const p1 = poly[(i+1)%n];
+      const cross = p0.x*p1.y - p1.x*p0.y;
+      A2 += cross;
+      Cx6A += (p0.x + p1.x) * cross;
+      Cy6A += (p0.y + p1.y) * cross;
+      Ix12 += (p0.y*p0.y + p0.y*p1.y + p1.y*p1.y) * cross;
+    }
 
-    // I about axis parallel to bases through trapezoid centroid:
-    // Icg = h^3 * (a^2 + 4ab + b^2) / (36*(a + b))
-    const Icg = Math.pow(h,3) * (a*a + 4*a*b + b*b) / (36*(a + b));
+    const A = A2 / 2;
+    const Cx = Cx6A / (6*A2);
+    const Cy = Cy6A / (6*A2);
+    const Ix0 = Ix12 / 12; // about x-axis at origin
 
-    return {A, y, Icg};
+    // Ensure positive area (if orientation negative)
+    const sign = (A < 0) ? -1 : 1;
+    return {
+      A: Math.abs(A),
+      Cx: Cx * sign,   // should be ~0 due symmetry
+      Cy: Cy * sign,
+      Ix0: Ix0 * sign  // make positive
+    };
   }
 
-  function compute() {
+  function compute(){
     const d = {
       D: +el("D").value,
       tw: +el("tw").value,
@@ -252,63 +302,40 @@
       tt: +el("tt").value,
       bb: +el("bb").value,
       tb: +el("tb").value,
-      hh: +el("hh").value,
-      bh: +el("bh").value
+      ht: +el("ht").value,
+      hb: +el("hb").value,
+      gamma: +el("gamma").value
     };
 
     const errs = validate(d);
     const msg = el("msg");
     msg.innerHTML = "";
-
-    if (errs.length) {
+    if (errs.length){
       msg.innerHTML = `<div class="warn">⚠ ${errs.join(" ")}</div>`;
       return null;
     }
     msg.innerHTML = `<div class="ok">✓ Inputs look OK</div>`;
 
-    const hw = d.D - d.tt - d.tb - d.hh; // web clear height (between bottom flange and haunch)
+    const poly = buildPolygon(d);
+    const props = polyProps(poly);
 
-    // Rectangles:
-    // Bottom flange: y0=0
-    const r1 = rectProps(d.bb, d.tb, 0);
+    // Convert Ix about bottom axis to Ix about centroid
+    const Ixx = props.Ix0 - props.A * props.Cy * props.Cy;
 
-    // Web rectangle: y0=tb, height=hw
-    const r2 = rectProps(d.tw, hw, d.tb);
+    const ybar = props.Cy;
+    const Ztop = Ixx / (d.D - ybar);
+    const Zbot = Ixx / (ybar);
 
-    // Haunch trapezoid: top located at yTop = tb + hw + hh (which is bottom of top flange)
-    // Top flange bottom is at y = D - tt. That equals tb + hw + hh.
-    // So yTop = D - tt
-    let h1 = null;
-    if (d.hh > 0 && d.bh > 0){
-      h1 = haunchProps(d.tw, d.bh, d.hh, d.D - d.tt);
-    }
+    // Quantity per meter
+    const Vpm = props.A / 1e6;              // m3 per meter
+    const Wpm = d.gamma * Vpm;              // kN per meter
 
-    // Top flange: y0 = D - tt
-    const r3 = rectProps(d.bt, d.tt, d.D - d.tt);
-
-    const parts = [r1, r2, r3];
-    if (h1) parts.push(h1);
-
-    const A = parts.reduce((s,p)=>s+p.A,0);
-    const ybar = parts.reduce((s,p)=>s+p.A*p.y,0) / A;
-
-    const Ixx = parts.reduce((s,p)=>{
-      const dy = p.y - ybar;
-      return s + p.Icg + p.A * dy * dy;
-    }, 0);
-
-    const yTop = d.D - ybar;
-    const yBot = ybar;
-
-    const Ztop = Ixx / yTop;
-    const Zbot = Ixx / yBot;
-
-    return {d, hw, A, ybar, Ixx, Ztop, Zbot};
+    return {d, poly, A: props.A, ybar, Ixx, Ztop, Zbot, Vpm, Wpm};
   }
 
   function draw(res){
     if (!res) return;
-    const {d, hw, ybar} = res;
+    const {d, poly, ybar} = res;
 
     const gShape = el("shape");
     const gAxis  = el("axis");
@@ -319,81 +346,42 @@
 
     const W = 900, H = 520, pad = 70;
 
-    // Choose bounding width (max of flange widths and haunch bottom width and web)
-    const maxB = Math.max(d.bt, d.bb, d.tw, d.bh);
-    const sx = (W - 2*pad) / maxB;
-    const sy = (H - 2*pad) / d.D;
-    const s  = Math.min(sx, sy);
+    // bounding box
+    const maxX = Math.max(...poly.map(p => Math.abs(p.x)));
+    const maxY = d.D;
 
-    const secW = maxB * s, secH = d.D * s;
+    const sx = (W - 2*pad) / (2*maxX);
+    const sy = (H - 2*pad) / (maxY);
+    const s = Math.min(sx, sy);
+
+    const secW = 2*maxX*s;
+    const secH = maxY*s;
     const x0 = (W - secW)/2;
     const y0 = (H - secH)/2;
 
-    // Map section coordinates (mm) to SVG (px)
-    const X = (x_mm) => x0 + x_mm * s;
-    const Y = (y_mm) => y0 + (d.D - y_mm) * s;
+    const X = (x) => x0 + (x + maxX) * s;
+    const Y = (y) => y0 + (maxY - y) * s;
 
-    const cx = maxB/2;
+    const pts = poly.map(p => `${X(p.x)},${Y(p.y)}`).join(" ");
 
-    // Centers
-    const topX = cx - d.bt/2;
-    const botX = cx - d.bb/2;
-    const webX = cx - d.tw/2;
-
-    // Fill/stroke
-    const rect = (x, y, w, h, fill) =>
-      `<rect x="${x}" y="${y}" width="${w}" height="${h}"
-             fill="${fill}" stroke="var(--shapeStroke)" stroke-width="2" rx="10" ry="10"/>`;
-
-    // Bottom flange: from y=0 to tb
-    gShape.insertAdjacentHTML("beforeend",
-      rect(X(botX), Y(d.tb), d.bb*s, d.tb*s, "var(--shapeFill)")
-    );
-
-    // Web: from y=tb to tb+hw
-    gShape.insertAdjacentHTML("beforeend",
-      rect(X(webX), Y(d.tb + hw), d.tw*s, hw*s, "var(--shapeFill)")
-    );
-
-    // Haunch: trapezoid under top flange (if hh > 0)
-    if (d.hh > 0 && d.bh > 0){
-      const haTopY = d.D - d.tt;     // top of haunch
-      const haBotY = haTopY - d.hh;  // bottom of haunch
-
-      const haTopX1 = cx - d.tw/2;
-      const haTopX2 = cx + d.tw/2;
-      const haBotX1 = cx - d.bh/2;
-      const haBotX2 = cx + d.bh/2;
-
-      gShape.insertAdjacentHTML("beforeend", `
-        <polygon points="
-          ${X(haTopX1)},${Y(haTopY)}
-          ${X(haTopX2)},${Y(haTopY)}
-          ${X(haBotX2)},${Y(haBotY)}
-          ${X(haBotX1)},${Y(haBotY)}
-        " fill="var(--haunchFill)" stroke="var(--shapeStroke)" stroke-width="2"/>
-      `);
-    }
-
-    // Top flange: from y=D-tt to D
-    gShape.insertAdjacentHTML("beforeend",
-      rect(X(topX), Y(d.D), d.bt*s, d.tt*s, "var(--shapeFill)")
-    );
-
-    // Centroidal axis line
-    gAxis.insertAdjacentHTML("beforeend", `
-      <line x1="${X(0)}" y1="${Y(ybar)}" x2="${X(maxB)}" y2="${Y(ybar)}"
-            stroke="var(--axis)" stroke-width="3" stroke-dasharray="10,8"/>
-      <circle cx="${X(cx)}" cy="${Y(ybar)}" r="5" fill="var(--axis)"/>
+    gShape.insertAdjacentHTML("beforeend", `
+      <polygon points="${pts}" fill="var(--shapeFill)" stroke="var(--shapeStroke)" stroke-width="2"/>
     `);
 
-    // Light bounding box
+    // centroid axis
+    gAxis.insertAdjacentHTML("beforeend", `
+      <line x1="${X(-maxX)}" y1="${Y(ybar)}" x2="${X(maxX)}" y2="${Y(ybar)}"
+            stroke="var(--axis)" stroke-width="3" stroke-dasharray="10,8"/>
+      <circle cx="${X(0)}" cy="${Y(ybar)}" r="5" fill="var(--axis)"/>
+    `);
+
+    // labels
     gDims.insertAdjacentHTML("beforeend", `
-      <rect x="${x0}" y="${y0}" width="${secW}" height="${secH}"
-            fill="transparent" stroke="rgba(255,255,255,.12)" stroke-width="2" rx="16" ry="16"/>
+      <rect x="${x0}" y="${y0}" width="${secW}" height="${secH}" fill="transparent"
+            stroke="rgba(255,255,255,.12)" stroke-width="2" rx="16" ry="16"/>
       <text x="18" y="30" fill="rgba(255,255,255,.85)" font-size="14">D=${d.D} mm</text>
       <text x="18" y="52" fill="rgba(255,255,255,.75)" font-size="13">
-        bt=${d.bt}, tt=${d.tt}, tw=${d.tw}, bb=${d.bb}, tb=${d.tb}, hh=${d.hh}, bh=${d.bh} (mm)
+        bt=${d.bt}, tt=${d.tt}, tw=${d.tw}, bb=${d.bb}, tb=${d.tb}, ht=${d.ht}, hb=${d.hb} (mm)
       </text>
     `);
   }
@@ -408,8 +396,10 @@
     el("Ztop").textContent = `${res.Ztop.toExponential(3)} mm³`;
     el("Zbot").textContent = `${res.Zbot.toExponential(3)} mm³`;
 
-    el("stamp").textContent = `Generated: ${nowStamp()}`;
+    el("Vpm").textContent  = `${fmt(res.Vpm,6)} m³/m`;
+    el("Wpm").textContent  = `${fmt(res.Wpm,3)} kN/m`;
 
+    el("stamp").textContent = `Generated: ${nowStamp()}`;
     draw(res);
   }
 
@@ -417,99 +407,92 @@
     const res = compute();
     if (!res) return;
 
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation:"p", unit:"mm", format:"a4" });
+
+    const margin = 12;
+    let y = margin;
+
+    // Title
+    pdf.setFont("helvetica","bold");
+    pdf.setFontSize(14);
+    pdf.text(el("rtitle").value || "Section Property Report", margin, y);
+    y += 7;
+
+    pdf.setFont("helvetica","normal");
+    pdf.setFontSize(10);
+    pdf.text(`Generated: ${nowStamp()}`, margin, y);
+    y += 8;
+
+    // Inputs
+    pdf.setFont("helvetica","bold"); pdf.text("Inputs (mm)", margin, y); y += 6;
+    pdf.setFont("helvetica","normal");
+
+    const d = res.d;
+    const inputLines = [
+      `D=${d.D}, tw=${d.tw}`,
+      `bt=${d.bt}, tt=${d.tt}`,
+      `bb=${d.bb}, tb=${d.tb}`,
+      `Top taper ht=${d.ht}, Bottom taper hb=${d.hb}`,
+      `Concrete density = ${d.gamma} kN/m³`
+    ];
+    inputLines.forEach(line => { pdf.text(line, margin, y); y += 5; });
+    y += 4;
+
+    // Results
+    pdf.setFont("helvetica","bold"); pdf.text("Results", margin, y); y += 6;
+    pdf.setFont("helvetica","normal");
+    const resLines = [
+      `Area A = ${Math.round(res.A)} mm²`,
+      `Centroid ȳ (from bottom) = ${res.ybar.toFixed(1)} mm`,
+      `Ixx (about centroid) = ${res.Ixx.toExponential(3)} mm⁴`,
+      `Ztop = ${res.Ztop.toExponential(3)} mm³`,
+      `Zbot = ${res.Zbot.toExponential(3)} mm³`,
+      `Concrete volume per meter = ${(res.Vpm).toFixed(6)} m³/m`,
+      `Self weight per meter = ${(res.Wpm).toFixed(3)} kN/m`
+    ];
+    resLines.forEach(line => { pdf.text(line, margin, y); y += 5; });
+
+    y += 4;
+
+    // Add graphic (capture SVG/report block)
     const report = el("reportArea");
-    const btn = el("pdfBtn");
-    const old = btn.textContent;
-    btn.textContent = "Preparing PDF…";
-    btn.disabled = true;
+    const canvas = await html2canvas(report, { scale: 2, backgroundColor: "#0b1220" });
+    const imgData = canvas.toDataURL("image/png");
 
-    try{
-      const canvas = await html2canvas(report, { scale: 2, backgroundColor: "#0b1220" });
-      const imgData = canvas.toDataURL("image/png");
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
+    const maxW = pageW - 2*margin;
+    const imgW = maxW;
+    const imgH = (canvas.height / canvas.width) * imgW;
 
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({ orientation: "p", unit: "mm", format: "a4" });
-
-      // Fit image to A4 width with margins
-      const pageW = pdf.internal.pageSize.getWidth();
-      const pageH = pdf.internal.pageSize.getHeight();
-      const margin = 10;
-      const maxW = pageW - 2*margin;
-
-      // Compute scaled height keeping aspect ratio
-      const imgW = maxW;
-      const imgH = (canvas.height / canvas.width) * imgW;
-
-      let y = margin;
-      pdf.setFont("helvetica", "bold");
-      pdf.setFontSize(14);
-      pdf.text("PSC Girder Section Properties Report", margin, y);
-      y += 7;
-
-      pdf.setFont("helvetica", "normal");
-      pdf.setFontSize(10);
-      pdf.text(`Generated: ${nowStamp()}`, margin, y);
-      y += 6;
-
-      // Add captured report (graphic + results)
-      if (imgH <= (pageH - y - margin)) {
-        pdf.addImage(imgData, "PNG", margin, y, imgW, imgH);
-      } else {
-        // If too tall, split pages roughly
-        // Add first page image portion by scaling; simplest: add full image on multiple pages by vertical offset
-        const pxPerMm = canvas.width / imgW;
-        const pageContentH = (pageH - y - margin);
-        const pageContentPx = pageContentH * pxPerMm;
-
-        let sy = 0;
-        let page = 0;
-
-        while (sy < canvas.height) {
-          if (page > 0) {
-            pdf.addPage();
-            y = margin;
-          }
-          // Create slice canvas
-          const slice = document.createElement("canvas");
-          slice.width = canvas.width;
-          slice.height = Math.min(pageContentPx, canvas.height - sy);
-          const ctx = slice.getContext("2d");
-          ctx.drawImage(canvas, 0, sy, canvas.width, slice.height, 0, 0, canvas.width, slice.height);
-          const sliceData = slice.toDataURL("image/png");
-          const sliceHmm = (slice.height / slice.width) * imgW;
-          pdf.addImage(sliceData, "PNG", margin, y, imgW, sliceHmm);
-          sy += slice.height;
-          page++;
-        }
-      }
-
-      pdf.save("psc_section_report.pdf");
-    } finally {
-      btn.textContent = old;
-      btn.disabled = false;
+    // If not enough space on same page, new page
+    if (y + imgH > pageH - margin) {
+      pdf.addPage();
+      y = margin;
     }
+    pdf.addImage(imgData, "PNG", margin, y, imgW, imgH);
+
+    pdf.save("psc_section_report.pdf");
   }
 
   el("calcBtn").addEventListener("click", updateUI);
   el("pdfBtn").addEventListener("click", downloadPDF);
 
   el("resetBtn").addEventListener("click", () => {
-    el("D").value = 1800;
-    el("tw").value = 200;
-    el("bt").value = 900;
+    el("D").value = 1372;
+    el("tw").value = 203;
+    el("bt").value = 508;
     el("tt").value = 200;
-    el("bb").value = 700;
-    el("tb").value = 250;
-    el("hh").value = 150;
-    el("bh").value = 400;
-    el("msg").innerHTML = "";
-    el("A").textContent = el("ybar").textContent = el("Ixx").textContent = el("Ztop").textContent = el("Zbot").textContent = "—";
-    el("shape").innerHTML = el("axis").innerHTML = el("dims").innerHTML = "";
-    el("stamp").textContent = "";
+    el("bb").value = 660;
+    el("tb").value = 220;
+    el("ht").value = 250;
+    el("hb").value = 300;
+    el("gamma").value = 25;
+    el("rtitle").value = "PSC Girder Section Property Report";
     updateUI();
   });
 
-  // Initial render
   updateUI();
 </script>
 </body>
