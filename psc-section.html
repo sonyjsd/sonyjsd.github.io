@@ -155,6 +155,7 @@
       <div class="actions">
         <button class="btn primary" id="calcBtn" type="button">Calculate</button>
         <button class="btn" id="pdfBtn" type="button">Download PDF</button>
+        <button class="btn" id="dxfBtn" type="button">Download DXF</button>
         <button class="btn" id="resetBtn" type="button">Reset</button>
         <span class="pill">Units: mm, mm², mm⁴, mm³</span>
       </div>
@@ -479,9 +480,44 @@ function buildPolygon(d){
 
     pdf.save("psc_section_report.pdf");
   }
+function downloadDXF(){
+  const res = compute();
+  if(!res) return;
 
+  const pts = res.poly;
+
+  let dxf = `0
+SECTION
+2
+ENTITIES
+0
+LWPOLYLINE
+8
+0
+90
+${pts.length}
+70
+1
+`;
+
+  pts.forEach(p=>{
+    dxf += `10\n${p.x.toFixed(3)}\n20\n${p.y.toFixed(3)}\n`;
+  });
+
+  dxf += `0
+ENDSEC
+0
+EOF`;
+
+  const blob = new Blob([dxf], {type:"application/dxf"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "psc_section.dxf";
+  a.click();
+}
   el("calcBtn").addEventListener("click", updateUI);
   el("pdfBtn").addEventListener("click", downloadPDF);
+  el("dxfBtn").addEventListener("click", downloadDXF);
 
   el("resetBtn").addEventListener("click", () => {
     el("D").value = 1372;
