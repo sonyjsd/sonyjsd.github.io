@@ -228,36 +228,42 @@
 
   // Build polygon points (x,y) in mm, symmetric about centerline.
   // Origin: bottom at y=0, centerline at x=0.
-  function buildPolygon(d){
-    const y0 = 0;
-    const y1 = d.tb;
-    const y2 = y1 + d.hb;
-    const y3 = d.D - d.tt - d.ht;
-    const y4 = d.D - d.tt;
-    const y5 = d.D;
+function buildPolygon(d){
+  // y-levels
+  const y0 = 0;
+  const y1 = d.tb;
+  const y2 = y1 + d.hb;          // end of bottom taper, start of web
+  const y3 = d.D - d.tt - d.ht;  // end of web, start of top taper
+  const y4 = d.D - d.tt;         // end of top taper, start of top flange
+  const y5 = d.D;
 
-    // half widths
-    const hb = d.bb/2;
-    const hw = d.tw/2;
-    const ht = d.bt/2;
+  // half-widths
+  const hbb = d.bb / 2;  // bottom flange half width
+  const htw = d.tw / 2;  // web half width
+  const hbt = d.bt / 2;  // top flange half width
 
-    // Right side profile points from bottom to top
-    const right = [
-      {x: hb, y: y0},  // bottom outer
-      {x: hb, y: y1},  // top of bottom flange
-      {x: hw, y: y2},  // after bottom taper to web
-      {x: hw, y: y3},  // web up to start of top taper
-      {x: ht, y: y4},  // top taper out to top flange
-      {x: ht, y: y5},  // top outer
-    ];
+  // Right side outline bottom->top (flat top and bottom)
+  const right = [
+    { x: hbb, y: y0 },   // bottom outer
+    { x: hbb, y: y1 },   // top of bottom flange (still full width)
+    { x: htw, y: y2 },   // bottom taper converges to web
+    { x: htw, y: y3 },   // web vertical
+    { x: hbt, y: y4 },   // top taper expands to top flange
+    { x: hbt, y: y5 },   // top outer (flat top)
+    { x: -hbt, y: y5 },  // go across top (flat)
+  ];
 
-    // Mirror to left side (reverse order)
-    const left = right.slice().reverse().map(p => ({x: -p.x, y: p.y}));
+  // Now go down the left side (mirror the corresponding points)
+  const leftDown = [
+    { x: -hbt, y: y4 },
+    { x: -htw, y: y3 },
+    { x: -htw, y: y2 },
+    { x: -hbb, y: y1 },
+    { x: -hbb, y: y0 }
+  ];
 
-    // Polygon: go up right side, then down left side (excluding duplicate top/bottom points)
-    const poly = [...right, ...left.slice(1, -1)];
-    return poly;
-  }
+  return [...right, ...leftDown];
+}
 
   // Polygon area, centroid, and second moment about x-axis through origin (y=0)
   // Using standard shoelace + polygon inertia formulas.
