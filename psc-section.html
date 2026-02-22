@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PSC Girder Section Properties</title>
+  <style>
+    :root{
+      --bg:#0b1220; --text:rgba(255,255,255,.92); --muted:rgba(255,255,255,.72);
+      --line:rgba(255,255,255,.14); --card:rgba(255,255,255,.06);
+      --accent:#7dd3fc; --accent2:#a78bfa;
+      --shadow:0 24px 60px rgba(0,0,0,.45);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; color:var(--text);
+      background:
+        radial-gradient(1000px 600px at 20% 10%, rgba(125,211,252,.18), transparent 60%),
+        radial-gradient(900px 500px at 80% 20%, rgba(167,139,250,.16), transparent 55%),
+        var(--bg);
+      min-height:100vh;
+    }
+    a{color:inherit}
+    .wrap{max-width:1100px;margin:0 auto;padding:22px 16px 44px}
+    .top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.2px}
+    .dot{width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 0 0 6px rgba(125,211,252,.10)}
+    .btn{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:10px 12px;border-radius:12px;border:1px solid var(--line);
+      background:rgba(255,255,255,.06);text-decoration:none;color:var(--text);font-weight:600;font-size:14px;
+    }
+    .btn:hover{background:rgba(255,255,255,.10)}
+    .grid{display:grid;grid-template-columns:380px 1fr;gap:14px}
+    @media(max-width:980px){.grid{grid-template-columns:1fr}}
+    .panel{
+      background:linear-gradient(180deg, rgba(255,255,255,.08), var(--card));
+      border:1px solid var(--line); border-radius:18px; box-shadow:var(--shadow);
+      padding:16px; backdrop-filter:blur(10px);
+    }
+    h1{margin:0;font-size:18px}
+    .muted{color:var(--muted);font-size:13px;line-height:1.5}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+    .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+    .field input{
+      width:100%;padding:10px 10px;border-radius:12px;border:1px solid var(--line);
+      background:rgba(0,0,0,.18);color:var(--text);outline:none;
+    }
+    .field input:focus{border-color:rgba(125,211,252,.55)}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .pill{display:inline-block;font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--muted)}
+    table{width:100%;border-collapse:collapse;margin-top:10px}
+    td{padding:10px;border-bottom:1px solid var(--line);font-size:14px}
+    td:nth-child(1){color:var(--muted);width:52%}
+    .svgWrap{display:grid;grid-template-columns:1fr;gap:10px}
+    .svgBox{
+      border:1px solid var(--line);border-radius:16px;background:rgba(0,0,0,.16);
+      overflow:hidden;
+    }
+    .warn{color:#ffd27d;font-size:13px;margin-top:10px}
+    .ok{color:#a7f3d0;font-size:13px;margin-top:10px}
+    .small{font-size:12px;color:var(--muted);margin-top:8px}
+    code{background:rgba(255,255,255,.06);padding:2px 6px;border-radius:8px;border:1px solid var(--line)}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand"><span class="dot"></span> PSC Girder Section Properties</div>
+    <a class="btn" href="index.html">← Back to Home</a>
+  </div>
+
+  <div class="grid">
+    <!-- Inputs -->
+    <div class="panel">
+      <h1>Inputs (mm)</h1>
+      <div class="muted">Standard I-girder (rectangular flanges + web). Calculates: Area A, centroid ȳ (from bottom), Ixx about centroid, section modulus Ztop &amp; Zbot.</div>
+
+      <div class="row">
+        <div class="field">
+          <label>Overall depth, D</label>
+          <input id="D" type="number" value="1800" min="1" step="1">
+        </div>
+        <div class="field">
+          <label>Web thickness, tw</label>
+          <input id="tw" type="number" value="200" min="1" step="1">
+        </div>
+
+        <div class="field">
+          <label>Top flange width, bt</label>
+          <input id="bt" type="number" value="900" min="1" step="1">
+        </div>
+        <div class="field">
+          <label>Top flange thickness, tt</label>
+          <input id="tt" type="number" value="200" min="1" step="1">
+        </div>
+
+        <div class="field">
+          <label>Bottom flange width, bb</label>
+          <input id="bb" type="number" value="700" min="1" step="1">
+        </div>
+        <div class="field">
+          <label>Bottom flange thickness, tb</label>
+          <input id="tb" type="number" value="250" min="1" step="1">
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn" id="calcBtn" type="button">Calculate</button>
+        <button class="btn" id="resetBtn" type="button">Reset</button>
+        <span class="pill">Units: mm, mm², mm⁴, mm³</span>
+      </div>
+
+      <div id="msg"></div>
+
+      <div class="small">
+        Note: If your girder has haunch/chamfer/tapers, we can add those next (as trapezoids/triangles). This version is the clean “core” I-section.
+      </div>
+    </div>
+
+    <!-- Graphic + Results -->
+    <div class="panel svgWrap">
+      <div>
+        <h1>Section (graphic)</h1>
+        <div class="muted">Auto-updates when you click Calculate.</div>
+      </div>
+
+      <div class="svgBox">
+        <svg id="svg" viewBox="0 0 900 520" width="100%" height="520" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="g" x1="0" x2="1">
+              <stop offset="0" stop-color="#7dd3fc" stop-opacity="0.22"/>
+              <stop offset="1" stop-color="#a78bfa" stop-opacity="0.18"/>
+            </linearGradient>
+          </defs>
+          <rect x="0" y="0" width="900" height="520" fill="transparent"/>
+          <g id="shape"></g>
+          <g id="dims"></g>
+          <g id="axis"></g>
+        </svg>
+      </div>
+
+      <div>
+        <h1>Results</h1>
+        <table>
+          <tbody>
+            <tr><td>Area, A</td><td id="A">—</td></tr>
+            <tr><td>Centroid from bottom, ȳ</td><td id="ybar">—</td></tr>
+            <tr><td>Ixx about centroid</td><td id="Ixx">—</td></tr>
+            <tr><td>Section modulus at top, Ztop</td><td id="Ztop">—</td></tr>
+            <tr><td>Section modulus at bottom, Zbot</td><td id="Zbot">—</td></tr>
+          </tbody>
+        </table>
+
+        <div class="small">
+          Export tip: copy values into your report. If you want, we can add a “Download PDF” later (still possible on GitHub Pages).
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const el = (id) => document.getElementById(id);
+
+  function fmt(x, decimals=2) {
+    if (!isFinite(x)) return "—";
+    const abs = Math.abs(x);
+    if (abs >= 1e9) return x.toExponential(3);
+    return x.toLocaleString(undefined, { maximumFractionDigits: decimals });
+  }
+
+  function validate(d) {
+    const errs = [];
+    if (d.D <= d.tt + d.tb) errs.push("Overall depth D must be greater than (tt + tb).");
+    if (d.tw > Math.min(d.bt, d.bb)) errs.push("Web thickness tw should not exceed flange widths.");
+    if ([d.D,d.tw,d.bt,d.tt,d.bb,d.tb].some(v => v <= 0)) errs.push("All dimensions must be > 0.");
+    return errs;
+  }
+
+  // Rectangle helper: b (width), h (height), y0 (bottom of rect from bottom of section)
+  function rectProps(b, h, y0) {
+    const A = b * h;
+    const y = y0 + h/2; // centroid from bottom
+    const Icg = b * Math.pow(h,3) / 12; // about its own centroid axis (horizontal)
+    return {A, y, Icg};
+  }
+
+  function compute() {
+    const d = {
+      D: +el("D").value,
+      tw: +el("tw").value,
+      bt: +el("bt").value,
+      tt: +el("tt").value,
+      bb: +el("bb").value,
+      tb: +el("tb").value
+    };
+
+    const errs = validate(d);
+    const msg = el("msg");
+    msg.innerHTML = "";
+    if (errs.length) {
+      msg.innerHTML = `<div class="warn">⚠ ${errs.join(" ")}</div>`;
+      return null;
+    } else {
+      msg.innerHTML = `<div class="ok">✓ Inputs look OK</div>`;
+    }
+
+    const hw = d.D - d.tt - d.tb; // web height between flanges
+
+    // Define rectangles from bottom:
+    // Bottom flange: width bb, thickness tb, starts at y0=0
+    const r1 = rectProps(d.bb, d.tb, 0);
+
+    // Web: thickness tw, height hw, starts at y0=tb
+    const r2 = rectProps(d.tw, hw, d.tb);
+
+    // Top flange: width bt, thickness tt, starts at y0=tb+hw
+    const r3 = rectProps(d.bt, d.tt, d.tb + hw);
+
+    const rects = [r1, r2, r3];
+
+    const A = rects.reduce((s,r)=>s+r.A,0);
+    const ybar = rects.reduce((s,r)=>s+r.A*r.y,0) / A;
+
+    // Ixx about centroid
+    const Ixx = rects.reduce((s,r)=>{
+      const dy = r.y - ybar;
+      return s + r.Icg + r.A * dy*dy;
+    }, 0);
+
+    const yTop = d.D - ybar;
+    const yBot = ybar;
+
+    const Ztop = Ixx / yTop;
+    const Zbot = Ixx / yBot;
+
+    return {d, A, ybar, Ixx, Ztop, Zbot};
+  }
+
+  function draw(res) {
+    if (!res) return;
+    const {d} = res;
+
+    const gShape = el("shape");
+    const gDims  = el("dims");
+    const gAxis  = el("axis");
+    gShape.innerHTML = "";
+    gDims.innerHTML = "";
+    gAxis.innerHTML = "";
+
+    // Canvas
+    const W = 900, H = 520;
+    const pad = 70;
+
+    // Scale to fit max width and depth
+    const maxB = Math.max(d.bt, d.bb);
+    const sx = (W - 2*pad) / maxB;
+    const sy = (H - 2*pad) / d.D;
+    const s  = Math.min(sx, sy);
+
+    const secW = maxB * s;
+    const secH = d.D * s;
+
+    const x0 = (W - secW)/2;
+    const y0 = (H - secH)/2;
+
+    // Helper to map section coords (mm) to svg coords (px)
+    // Section origin: bottom-left of bounding box
+    const X = (x_mm) => x0 + x_mm * s;
+    const Y = (y_mm) => y0 + (d.D - y_mm) * s; // invert for svg
+
+    // Centered web and flanges within maxB bounding box
+    const webX = (maxB - d.tw)/2;
+    const topX = (maxB - d.bt)/2;
+    const botX = (maxB - d.bb)/2;
+
+    const hw = d.D - d.tt - d.tb;
+
+    // Draw shapes (filled)
+    const rect = (x, y, w, h, fill="url(#g)") =>
+      `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="10" ry="10" fill="${fill}" stroke="rgba(255,255,255,.25)" stroke-width="2"/>`;
+
+    // Bottom flange
+    gShape.insertAdjacentHTML("beforeend",
+      rect(X(botX), Y(d.tb), d.bb*s, d.tb*s)
+    );
+    // Web
+    gShape.insertAdjacentHTML("beforeend",
+      rect(X(webX), Y(d.tb+hw), d.tw*s, hw*s)
+    );
+    // Top flange
+    gShape.insertAdjacentHTML("beforeend",
+      rect(X(topX), Y(d.D), d.bt*s, d.tt*s)
+    );
+
+    // Draw centroidal axis
+    const ybar = res.ybar;
+    gAxis.insertAdjacentHTML("beforeend",
+      `<line x1="${X(0)}" y1="${Y(ybar)}" x2="${X(maxB)}" y2="${Y(ybar)}"
+             stroke="${'rgba(125,211,252,.9)'}" stroke-width="3" stroke-dasharray="10,8"/>
+       <text x="${X(maxB)+8}" y="${Y(ybar)+5}" fill="rgba(255,255,255,.8)" font-size="14">x-x (ȳ=${fmt(ybar,1)} mm)</text>`
+    );
+
+    // Dimension notes (simple labels)
+    const label = (x, y, t) =>
+      `<text x="${x}" y="${y}" fill="rgba(255,255,255,.85)" font-size="14">${t}</text>`;
+
+    gDims.insertAdjacentHTML("beforeend", label(18, 30, `D=${fmt(d.D,0)} mm`));
+    gDims.insertAdjacentHTML("beforeend", label(18, 52, `bt=${fmt(d.bt,0)}  tt=${fmt(d.tt,0)}  tw=${fmt(d.tw,0)}  bb=${fmt(d.bb,0)}  tb=${fmt(d.tb,0)} (mm)`));
+
+    // Outline bounding box (subtle)
+    gDims.insertAdjacentHTML("beforeend",
+      `<rect x="${x0}" y="${y0}" width="${secW}" height="${secH}" fill="transparent"
+             stroke="rgba(255,255,255,.12)" stroke-width="2" rx="16" ry="16"/>`
+    );
+  }
+
+  function updateUI() {
+    const res = compute();
+    if (!res) return;
+    el("A").textContent    = `${fmt(res.A,0)} mm²`;
+    el("ybar").textContent = `${fmt(res.ybar,1)} mm`;
+    el("Ixx").textContent  = `${fmt(res.Ixx,0)} mm⁴`;
+    el("Ztop").textContent = `${fmt(res.Ztop,0)} mm³`;
+    el("Zbot").textContent = `${fmt(res.Zbot,0)} mm³`;
+    draw(res);
+  }
+
+  el("calcBtn").addEventListener("click", updateUI);
+
+  el("resetBtn").addEventListener("click", () => {
+    el("D").value = 1800;
+    el("tw").value = 200;
+    el("bt").value = 900;
+    el("tt").value = 200;
+    el("bb").value = 700;
+    el("tb").value = 250;
+    el("msg").innerHTML = "";
+    el("A").textContent = el("ybar").textContent = el("Ixx").textContent = el("Ztop").textContent = el("Zbot").textContent = "—";
+    el("shape").innerHTML = el("dims").innerHTML = el("axis").innerHTML = "";
+  });
+
+  // initial draw on load
+  updateUI();
+</script>
+</body>
+</html>
