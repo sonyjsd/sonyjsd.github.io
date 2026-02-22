@@ -484,30 +484,73 @@ function downloadDXF(){
   const res = compute();
   if(!res) return;
 
-  const pts = res.poly;
+  const pts = res.poly; // points are in mm, around x=0
 
-  let dxf = `0
-SECTION
-2
-ENTITIES
-0
-LWPOLYLINE
-8
-0
-90
-${pts.length}
-70
-1
-`;
+  // DXF likes CRLF newlines
+  const NL = "\r\n";
 
-  pts.forEach(p=>{
-    dxf += `10\n${p.x.toFixed(3)}\n20\n${p.y.toFixed(3)}\n`;
+  // helper to append
+  let dxf = "";
+  const add = (s) => { dxf += s + NL; };
+
+  // --- HEADER (units mm) ---
+  add("0"); add("SECTION");
+  add("2"); add("HEADER");
+  add("9"); add("$ACADVER");
+  add("1"); add("AC1015");           // AutoCAD 2000
+  add("9"); add("$INSUNITS");
+  add("70"); add("4");               // 4 = millimeters
+  add("0"); add("ENDSEC");
+
+  // --- ENTITIES ---
+  add("0"); add("SECTION");
+  add("2"); add("ENTITIES");
+
+  // Add an origin cross (so you always see something)
+  const cross = 50; // 50 mm
+  // Line 1
+  add("0"); add("LINE");
+  add("8"); add("0");                // layer
+  add("62"); add("1");               // color red
+  add("10"); add((-cross).toFixed(3));
+  add("20"); add("0.000");
+  add("30"); add("0.000");
+  add("11"); add((cross).toFixed(3));
+  add("21"); add("0.000");
+  add("31"); add("0.000");
+  // Line 2
+  add("0"); add("LINE");
+  add("8"); add("0");
+  add("62"); add("1");
+  add("10"); add("0.000");
+  add("20"); add((-cross).toFixed(3));
+  add("30"); add("0.000");
+  add("11"); add("0.000");
+  add("21"); add((cross).toFixed(3));
+  add("31"); add("0.000");
+
+  // Export as classic POLYLINE/VERTEX (most compatible)
+  add("0"); add("POLYLINE");
+  add("8"); add("0");
+  add("62"); add("7");               // color white
+  add("66"); add("1");               // vertices follow
+  add("70"); add("1");               // closed polyline
+  add("10"); add("0.000");
+  add("20"); add("0.000");
+  add("30"); add("0.000");
+
+  pts.forEach(p => {
+    add("0"); add("VERTEX");
+    add("8"); add("0");
+    add("10"); add(p.x.toFixed(3));
+    add("20"); add(p.y.toFixed(3));
+    add("30"); add("0.000");
   });
 
-  dxf += `0
-ENDSEC
-0
-EOF`;
+  add("0"); add("SEQEND");
+
+  add("0"); add("ENDSEC");
+  add("0"); add("EOF");
 
   const blob = new Blob([dxf], {type:"application/dxf"});
   const a = document.createElement("a");
