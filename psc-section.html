@@ -173,13 +173,21 @@
       <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:10px;flex-wrap:wrap;">
         <div>
           <h1>Section (graphic)</h1>
-          <div class="muted">Section shown as tapered polygon + centroid axis.</div>
+          <div class="muted">Section shown as tapered polygon + centroid axis + dimensions.</div>
         </div>
         <div class="muted" id="stamp"></div>
       </div>
 
       <div class="svgBox" style="margin-top:10px;">
         <svg id="svg" viewBox="0 0 900 520" width="100%" height="520" xmlns="http://www.w3.org/2000/svg">
+          <!-- Marker defs moved HERE (safe) -->
+          <defs>
+            <marker id="arr" markerWidth="10" markerHeight="10" refX="6" refY="3"
+              orient="auto" markerUnits="strokeWidth">
+              <path d="M0,0 L6,3 L0,6 Z" fill="rgba(255,255,255,.85)" />
+            </marker>
+          </defs>
+
           <g id="shape"></g>
           <g id="axis"></g>
           <g id="dims"></g>
@@ -229,51 +237,47 @@
 
   // Build polygon points (x,y) in mm, symmetric about centerline.
   // Origin: bottom at y=0, centerline at x=0.
-function buildPolygon(d){
-  // y-levels
-  const y0 = 0;
-  const y1 = d.tb;
-  const y2 = y1 + d.hb;          // end of bottom taper, start of web
-  const y3 = d.D - d.tt - d.ht;  // end of web, start of top taper
-  const y4 = d.D - d.tt;         // end of top taper, start of top flange
-  const y5 = d.D;
+  function buildPolygon(d){
+    // y-levels
+    const y0 = 0;
+    const y1 = d.tb;
+    const y2 = y1 + d.hb;          // end of bottom taper, start of web
+    const y3 = d.D - d.tt - d.ht;  // end of web, start of top taper
+    const y4 = d.D - d.tt;         // end of top taper, start of top flange
+    const y5 = d.D;
 
-  // half-widths
-  const hbb = d.bb / 2;  // bottom flange half width
-  const htw = d.tw / 2;  // web half width
-  const hbt = d.bt / 2;  // top flange half width
+    // half-widths
+    const hbb = d.bb / 2;
+    const htw = d.tw / 2;
+    const hbt = d.bt / 2;
 
-  // Right side outline bottom->top (flat top and bottom)
-  const right = [
-    { x: hbb, y: y0 },   // bottom outer
-    { x: hbb, y: y1 },   // top of bottom flange (still full width)
-    { x: htw, y: y2 },   // bottom taper converges to web
-    { x: htw, y: y3 },   // web vertical
-    { x: hbt, y: y4 },   // top taper expands to top flange
-    { x: hbt, y: y5 },   // top outer (flat top)
-    { x: -hbt, y: y5 },  // go across top (flat)
-  ];
+    const right = [
+      { x: hbb, y: y0 },
+      { x: hbb, y: y1 },
+      { x: htw, y: y2 },
+      { x: htw, y: y3 },
+      { x: hbt, y: y4 },
+      { x: hbt, y: y5 },
+      { x: -hbt, y: y5 },
+    ];
 
-  // Now go down the left side (mirror the corresponding points)
-  const leftDown = [
-    { x: -hbt, y: y4 },
-    { x: -htw, y: y3 },
-    { x: -htw, y: y2 },
-    { x: -hbb, y: y1 },
-    { x: -hbb, y: y0 }
-  ];
+    const leftDown = [
+      { x: -hbt, y: y4 },
+      { x: -htw, y: y3 },
+      { x: -htw, y: y2 },
+      { x: -hbb, y: y1 },
+      { x: -hbb, y: y0 }
+    ];
 
-  return [...right, ...leftDown];
-}
+    return [...right, ...leftDown];
+  }
 
   // Polygon area, centroid, and second moment about x-axis through origin (y=0)
-  // Using standard shoelace + polygon inertia formulas.
-  // Returns A (mm2), Cx (mm), Cy (mm), Ix0 (mm4) about x-axis at origin (bottom axis).
   function polyProps(poly){
-    let A2 = 0;     // 2A
-    let Cx6A = 0;   // 6A*Cx
-    let Cy6A = 0;   // 6A*Cy
-    let Ix12 = 0;   // 12*Ix0
+    let A2 = 0;
+    let Cx6A = 0;
+    let Cy6A = 0;
+    let Ix12 = 0;
 
     const n = poly.length;
     for (let i=0; i<n; i++){
@@ -289,15 +293,14 @@ function buildPolygon(d){
     const A = A2 / 2;
     const Cx = Cx6A / (6*A2);
     const Cy = Cy6A / (6*A2);
-    const Ix0 = Ix12 / 12; // about x-axis at origin
+    const Ix0 = Ix12 / 12;
 
-    // Ensure positive area (if orientation negative)
     const sign = (A < 0) ? -1 : 1;
     return {
       A: Math.abs(A),
-      Cx: Cx * sign,   // should be ~0 due symmetry
+      Cx: Cx * sign,
       Cy: Cy * sign,
-      Ix0: Ix0 * sign  // make positive
+      Ix0: Ix0 * sign
     };
   }
 
@@ -326,64 +329,50 @@ function buildPolygon(d){
     const poly = buildPolygon(d);
     const props = polyProps(poly);
 
-    // Convert Ix about bottom axis to Ix about centroid
     const Ixx = props.Ix0 - props.A * props.Cy * props.Cy;
 
     const ybar = props.Cy;
     const Ztop = Ixx / (d.D - ybar);
     const Zbot = Ixx / (ybar);
 
-    // Quantity per meter
-    const Vpm = props.A / 1e6;              // m3 per meter
-    const Wpm = d.gamma * Vpm;              // kN per meter
+    const Vpm = props.A / 1e6;
+    const Wpm = d.gamma * Vpm;
 
     return {d, poly, A: props.A, ybar, Ixx, Ztop, Zbot, Vpm, Wpm};
   }
-function svgLine(x1,y1,x2,y2,stroke="rgba(255,255,255,.7)",w=2,dash=""){
-  return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"
-    stroke="${stroke}" stroke-width="${w}" ${dash?`stroke-dasharray="${dash}"`:``} />`;
-}
 
-function svgText(x,y,txt,anchor="middle"){
-  return `<text x="${x}" y="${y}" fill="rgba(255,255,255,.85)"
-    font-size="14" text-anchor="${anchor}" font-family="system-ui, Arial">${txt}</text>`;
-}
+  // --- SVG helpers for dimensions ---
+  function svgLine(x1,y1,x2,y2,stroke="rgba(255,255,255,.7)",w=2,dash=""){
+    return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"
+      stroke="${stroke}" stroke-width="${w}" ${dash?`stroke-dasharray="${dash}"`:``} />`;
+  }
+  function svgText(x,y,txt,anchor="middle"){
+    return `<text x="${x}" y="${y}" fill="rgba(255,255,255,.85)"
+      font-size="14" text-anchor="${anchor}" font-family="system-ui, Arial">${txt}</text>`;
+  }
+  function dimH(x1, x2, y, ext=18, label=""){
+    const yExtTop = y - ext;
+    return `
+      ${svgLine(x1,y,x1,yExtTop)}
+      ${svgLine(x2,y,x2,yExtTop)}
+      <line x1="${x1}" y1="${yExtTop}" x2="${x2}" y2="${yExtTop}"
+        stroke="rgba(255,255,255,.8)" stroke-width="2"
+        marker-start="url(#arr)" marker-end="url(#arr)"/>
+      ${svgText((x1+x2)/2, yExtTop-6, label)}
+    `;
+  }
+  function dimV(x, y1, y2, ext=18, label=""){
+    const xExt = x + ext;
+    return `
+      ${svgLine(x,y1,xExt,y1)}
+      ${svgLine(x,y2,xExt,y2)}
+      <line x1="${xExt}" y1="${y1}" x2="${xExt}" y2="${y2}"
+        stroke="rgba(255,255,255,.8)" stroke-width="2"
+        marker-start="url(#arr)" marker-end="url(#arr)"/>
+      ${svgText(xExt+6, (y1+y2)/2 + 5, label, "start")}
+    `;
+  }
 
-function svgArrowHead(id,color="rgba(255,255,255,.8)"){
-  return `
-  <defs>
-    <marker id="${id}" markerWidth="10" markerHeight="10" refX="6" refY="3"
-      orient="auto" markerUnits="strokeWidth">
-      <path d="M0,0 L6,3 L0,6 Z" fill="${color}" />
-    </marker>
-  </defs>`;
-}
-
-function dimH(x1, x2, y, ext=18, label=""){
-  // horizontal dimension between x1 and x2 at y
-  const yExtTop = y - ext;
-  return `
-    ${svgLine(x1,y,x1,yExtTop)}
-    ${svgLine(x2,y,x2,yExtTop)}
-    <line x1="${x1}" y1="${yExtTop}" x2="${x2}" y2="${yExtTop}"
-      stroke="rgba(255,255,255,.8)" stroke-width="2"
-      marker-start="url(#arr)" marker-end="url(#arr)"/>
-    ${svgText((x1+x2)/2, yExtTop-6, label)}
-  `;
-}
-
-function dimV(x, y1, y2, ext=18, label=""){
-  // vertical dimension between y1 and y2 at x
-  const xExt = x + ext;
-  return `
-    ${svgLine(x,y1,xExt,y1)}
-    ${svgLine(x,y2,xExt,y2)}
-    <line x1="${xExt}" y1="${y1}" x2="${xExt}" y2="${y2}"
-      stroke="rgba(255,255,255,.8)" stroke-width="2"
-      marker-start="url(#arr)" marker-end="url(#arr)"/>
-    ${svgText(xExt+6, (y1+y2)/2 + 5, label, "start")}
-  `;
-}
   function draw(res){
     if (!res) return;
     const {d, poly, ybar} = res;
@@ -397,7 +386,6 @@ function dimV(x, y1, y2, ext=18, label=""){
 
     const W = 900, H = 520, pad = 70;
 
-    // bounding box
     const maxX = Math.max(...poly.map(p => Math.abs(p.x)));
     const maxY = d.D;
 
@@ -419,68 +407,60 @@ function dimV(x, y1, y2, ext=18, label=""){
       <polygon points="${pts}" fill="var(--shapeFill)" stroke="var(--shapeStroke)" stroke-width="2"/>
     `);
 
-    // centroid axis
     gAxis.insertAdjacentHTML("beforeend", `
       <line x1="${X(-maxX)}" y1="${Y(ybar)}" x2="${X(maxX)}" y2="${Y(ybar)}"
             stroke="var(--axis)" stroke-width="3" stroke-dasharray="10,8"/>
       <circle cx="${X(0)}" cy="${Y(ybar)}" r="5" fill="var(--axis)"/>
     `);
-// Add arrow marker once
-gDims.insertAdjacentHTML("beforeend", svgArrowHead("arr"));
 
-// Key y-levels in mm
-const y0 = 0;
-const y1 = d.tb;
-const y2 = y1 + d.hb;
-const y3 = d.D - d.tt - d.ht;
-const y4 = d.D - d.tt;
-const y5 = d.D;
+    // Dimensions
+    const y00 = 0;
+    const y1 = d.tb;
+    const y2 = y1 + d.hb;
+    const y3 = d.D - d.tt - d.ht;
+    const y4 = d.D - d.tt;
+    const y5 = d.D;
 
-// Key half widths
-const hbb = d.bb/2;
-const htw = d.tw/2;
-const hbt = d.bt/2;
+    const hbb = d.bb/2;
+    const htw = d.tw/2;
+    const hbt = d.bt/2;
 
-// Convert to SVG coordinates
-const xLeftTop  = X(-hbt), xRightTop  = X(hbt);
-const xLeftWeb  = X(-htw), xRightWeb  = X(htw);
-const xLeftBot  = X(-hbb), xRightBot  = X(hbb);
+    const xLeftTop  = X(-hbt), xRightTop  = X(hbt);
+    const xLeftWeb  = X(-htw), xRightWeb  = X(htw);
+    const xLeftBot  = X(-hbb), xRightBot  = X(hbb);
 
-// Place dimensions slightly outside the section
-// Horizontal dims: bt at top, tw at web, bb at bottom
-gDims.insertAdjacentHTML("beforeend",
-  dimH(xLeftTop, xRightTop, Y(y5) + 40, 18, `bt = ${d.bt} mm`)
-);
+    gDims.insertAdjacentHTML("beforeend",
+      dimH(xLeftTop, xRightTop, Y(y5) + 40, 18, `bt = ${d.bt} mm`)
+    );
 
-gDims.insertAdjacentHTML("beforeend",
-  dimH(xLeftWeb, xRightWeb, Y((y2+y3)/2) + 40, 18, `tw = ${d.tw} mm`)
-);
+    gDims.insertAdjacentHTML("beforeend",
+      dimH(xLeftWeb, xRightWeb, Y((y2+y3)/2) + 40, 18, `tw = ${d.tw} mm`)
+    );
 
-gDims.insertAdjacentHTML("beforeend",
-  dimH(xLeftBot, xRightBot, Y(y0) - 20, 18, `bb = ${d.bb} mm`)
-);
+    // FIX: keep bottom width dimension inside viewbox
+    gDims.insertAdjacentHTML("beforeend",
+      dimH(xLeftBot, xRightBot, Y(y00) + 40, 18, `bb = ${d.bb} mm`)
+    );
 
-// Vertical dims: D at left side
-gDims.insertAdjacentHTML("beforeend",
-  dimV(X(-hbb) - 60, Y(y0), Y(y5), -18, `D = ${d.D} mm`)
-);
+    // overall depth at left
+    gDims.insertAdjacentHTML("beforeend",
+      dimV(X(-hbb) - 60, Y(y00), Y(y5), -18, `D = ${d.D} mm`)
+    );
 
-// Optional vertical segment dims on right side
-gDims.insertAdjacentHTML("beforeend",
-  dimV(X(hbb) + 30, Y(y0), Y(y1), 18, `tb = ${d.tb}`)
-);
+    // segment heights at right
+    gDims.insertAdjacentHTML("beforeend",
+      dimV(X(hbb) + 30, Y(y00), Y(y1), 18, `tb = ${d.tb}`)
+    );
+    gDims.insertAdjacentHTML("beforeend",
+      dimV(X(hbb) + 30, Y(y1), Y(y2), 18, `hb = ${d.hb}`)
+    );
+    gDims.insertAdjacentHTML("beforeend",
+      dimV(X(hbb) + 30, Y(y3), Y(y4), 18, `ht = ${d.ht}`)
+    );
+    gDims.insertAdjacentHTML("beforeend",
+      dimV(X(hbb) + 30, Y(y4), Y(y5), 18, `tt = ${d.tt}`)
+    );
 
-gDims.insertAdjacentHTML("beforeend",
-  dimV(X(hbb) + 30, Y(y1), Y(y2), 18, `hb = ${d.hb}`)
-);
-
-gDims.insertAdjacentHTML("beforeend",
-  dimV(X(hbb) + 30, Y(y3), Y(y4), 18, `ht = ${d.ht}`)
-);
-
-gDims.insertAdjacentHTML("beforeend",
-  dimV(X(hbb) + 30, Y(y4), Y(y5), 18, `tt = ${d.tt}`)
-);
     // labels
     gDims.insertAdjacentHTML("beforeend", `
       <text x="18" y="30" fill="rgba(255,255,255,.85)" font-size="14">D=${d.D} mm</text>
@@ -517,7 +497,6 @@ gDims.insertAdjacentHTML("beforeend",
     const margin = 12;
     let y = margin;
 
-    // Title
     pdf.setFont("helvetica","bold");
     pdf.setFontSize(14);
     pdf.text(el("rtitle").value || "Section Property Report", margin, y);
@@ -528,7 +507,6 @@ gDims.insertAdjacentHTML("beforeend",
     pdf.text(`Generated: ${nowStamp()}`, margin, y);
     y += 8;
 
-    // Inputs
     pdf.setFont("helvetica","bold"); pdf.text("Inputs (mm)", margin, y); y += 6;
     pdf.setFont("helvetica","normal");
 
@@ -543,7 +521,6 @@ gDims.insertAdjacentHTML("beforeend",
     inputLines.forEach(line => { pdf.text(line, margin, y); y += 5; });
     y += 4;
 
-    // Results
     pdf.setFont("helvetica","bold"); pdf.text("Results", margin, y); y += 6;
     pdf.setFont("helvetica","normal");
     const resLines = [
@@ -559,7 +536,6 @@ gDims.insertAdjacentHTML("beforeend",
 
     y += 4;
 
-    // Add graphic (capture SVG/report block)
     const report = el("reportArea");
     const canvas = await html2canvas(report, { scale: 2, backgroundColor: "#0b1220" });
     const imgData = canvas.toDataURL("image/png");
@@ -570,7 +546,6 @@ gDims.insertAdjacentHTML("beforeend",
     const imgW = maxW;
     const imgH = (canvas.height / canvas.width) * imgW;
 
-    // If not enough space on same page, new page
     if (y + imgH > pageH - margin) {
       pdf.addPage();
       y = margin;
@@ -579,70 +554,66 @@ gDims.insertAdjacentHTML("beforeend",
 
     pdf.save("psc_section_report.pdf");
   }
-function downloadDXF(){
 
-  const res = compute();
-  if(!res) return;
+  function downloadDXF(){
+    const res = compute();
+    if(!res) return;
 
-  const pts = res.poly;
+    const pts = res.poly;
 
-  const NL = "\r\n";
-  let dxf = "";
-  const add = s => dxf += s + NL;
+    const NL = "\r\n";
+    let dxf = "";
+    const add = s => dxf += s + NL;
 
-  // ================= HEADER =================
-  add("0"); add("SECTION");
-  add("2"); add("HEADER");
-  add("9"); add("$INSUNITS");
-  add("70"); add("4");   // millimeters
-  add("0"); add("ENDSEC");
+    add("0"); add("SECTION");
+    add("2"); add("HEADER");
+    add("9"); add("$INSUNITS");
+    add("70"); add("4");
+    add("0"); add("ENDSEC");
 
-  // ================= TABLES =================
-  add("0"); add("SECTION");
-  add("2"); add("TABLES");
+    add("0"); add("SECTION");
+    add("2"); add("TABLES");
 
-  add("0"); add("TABLE");
-  add("2"); add("LAYER");
-  add("70"); add("1");
+    add("0"); add("TABLE");
+    add("2"); add("LAYER");
+    add("70"); add("1");
 
-  add("0"); add("LAYER");
-  add("2"); add("0");
-  add("70"); add("0");
-  add("62"); add("7");
-  add("6"); add("CONTINUOUS");
+    add("0"); add("LAYER");
+    add("2"); add("0");
+    add("70"); add("0");
+    add("62"); add("7");
+    add("6"); add("CONTINUOUS");
 
-  add("0"); add("ENDTAB");
-  add("0"); add("ENDSEC");
+    add("0"); add("ENDTAB");
+    add("0"); add("ENDSEC");
 
-  // ================= ENTITIES =================
-  add("0"); add("SECTION");
-  add("2"); add("ENTITIES");
+    add("0"); add("SECTION");
+    add("2"); add("ENTITIES");
 
-  // POLYLINE
-  add("0"); add("POLYLINE");
-  add("8"); add("0");
-  add("66"); add("1");
-  add("70"); add("1");
-
-  pts.forEach(p=>{
-    add("0"); add("VERTEX");
+    add("0"); add("POLYLINE");
     add("8"); add("0");
-    add("10"); add(p.x.toFixed(3));
-    add("20"); add(p.y.toFixed(3));
-    add("30"); add("0");
-  });
+    add("66"); add("1");
+    add("70"); add("1");
 
-  add("0"); add("SEQEND");
+    pts.forEach(p=>{
+      add("0"); add("VERTEX");
+      add("8"); add("0");
+      add("10"); add(p.x.toFixed(3));
+      add("20"); add(p.y.toFixed(3));
+      add("30"); add("0");
+    });
 
-  add("0"); add("ENDSEC");
-  add("0"); add("EOF");
+    add("0"); add("SEQEND");
+    add("0"); add("ENDSEC");
+    add("0"); add("EOF");
 
-  const blob = new Blob([dxf],{type:"application/dxf"});
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(blob);
-  a.download="psc_section.dxf";
-  a.click();
-}
+    const blob = new Blob([dxf],{type:"application/dxf"});
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download="psc_section.dxf";
+    a.click();
+  }
+
   el("calcBtn").addEventListener("click", updateUI);
   el("pdfBtn").addEventListener("click", downloadPDF);
   el("dxfBtn").addEventListener("click", downloadDXF);
