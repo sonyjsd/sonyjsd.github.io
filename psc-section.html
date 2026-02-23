@@ -339,7 +339,51 @@ function buildPolygon(d){
 
     return {d, poly, A: props.A, ybar, Ixx, Ztop, Zbot, Vpm, Wpm};
   }
+function svgLine(x1,y1,x2,y2,stroke="rgba(255,255,255,.7)",w=2,dash=""){
+  return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"
+    stroke="${stroke}" stroke-width="${w}" ${dash?`stroke-dasharray="${dash}"`:``} />`;
+}
 
+function svgText(x,y,txt,anchor="middle"){
+  return `<text x="${x}" y="${y}" fill="rgba(255,255,255,.85)"
+    font-size="14" text-anchor="${anchor}" font-family="system-ui, Arial">${txt}</text>`;
+}
+
+function svgArrowHead(id,color="rgba(255,255,255,.8)"){
+  return `
+  <defs>
+    <marker id="${id}" markerWidth="10" markerHeight="10" refX="6" refY="3"
+      orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L6,3 L0,6 Z" fill="${color}" />
+    </marker>
+  </defs>`;
+}
+
+function dimH(x1, x2, y, ext=18, label=""){
+  // horizontal dimension between x1 and x2 at y
+  const yExtTop = y - ext;
+  return `
+    ${svgLine(x1,y,x1,yExtTop)}
+    ${svgLine(x2,y,x2,yExtTop)}
+    <line x1="${x1}" y1="${yExtTop}" x2="${x2}" y2="${yExtTop}"
+      stroke="rgba(255,255,255,.8)" stroke-width="2"
+      marker-start="url(#arr)" marker-end="url(#arr)"/>
+    ${svgText((x1+x2)/2, yExtTop-6, label)}
+  `;
+}
+
+function dimV(x, y1, y2, ext=18, label=""){
+  // vertical dimension between y1 and y2 at x
+  const xExt = x + ext;
+  return `
+    ${svgLine(x,y1,xExt,y1)}
+    ${svgLine(x,y2,xExt,y2)}
+    <line x1="${xExt}" y1="${y1}" x2="${xExt}" y2="${y2}"
+      stroke="rgba(255,255,255,.8)" stroke-width="2"
+      marker-start="url(#arr)" marker-end="url(#arr)"/>
+    ${svgText(xExt+6, (y1+y2)/2 + 5, label, "start")}
+  `;
+}
   function draw(res){
     if (!res) return;
     const {d, poly, ybar} = res;
@@ -381,7 +425,62 @@ function buildPolygon(d){
             stroke="var(--axis)" stroke-width="3" stroke-dasharray="10,8"/>
       <circle cx="${X(0)}" cy="${Y(ybar)}" r="5" fill="var(--axis)"/>
     `);
+// Add arrow marker once
+gDims.insertAdjacentHTML("beforeend", svgArrowHead("arr"));
 
+// Key y-levels in mm
+const y0 = 0;
+const y1 = d.tb;
+const y2 = y1 + d.hb;
+const y3 = d.D - d.tt - d.ht;
+const y4 = d.D - d.tt;
+const y5 = d.D;
+
+// Key half widths
+const hbb = d.bb/2;
+const htw = d.tw/2;
+const hbt = d.bt/2;
+
+// Convert to SVG coordinates
+const xLeftTop  = X(-hbt), xRightTop  = X(hbt);
+const xLeftWeb  = X(-htw), xRightWeb  = X(htw);
+const xLeftBot  = X(-hbb), xRightBot  = X(hbb);
+
+// Place dimensions slightly outside the section
+// Horizontal dims: bt at top, tw at web, bb at bottom
+gDims.insertAdjacentHTML("beforeend",
+  dimH(xLeftTop, xRightTop, Y(y5) + 40, 18, `bt = ${d.bt} mm`)
+);
+
+gDims.insertAdjacentHTML("beforeend",
+  dimH(xLeftWeb, xRightWeb, Y((y2+y3)/2) + 40, 18, `tw = ${d.tw} mm`)
+);
+
+gDims.insertAdjacentHTML("beforeend",
+  dimH(xLeftBot, xRightBot, Y(y0) - 20, 18, `bb = ${d.bb} mm`)
+);
+
+// Vertical dims: D at left side
+gDims.insertAdjacentHTML("beforeend",
+  dimV(X(-hbb) - 60, Y(y0), Y(y5), -18, `D = ${d.D} mm`)
+);
+
+// Optional vertical segment dims on right side
+gDims.insertAdjacentHTML("beforeend",
+  dimV(X(hbb) + 30, Y(y0), Y(y1), 18, `tb = ${d.tb}`)
+);
+
+gDims.insertAdjacentHTML("beforeend",
+  dimV(X(hbb) + 30, Y(y1), Y(y2), 18, `hb = ${d.hb}`)
+);
+
+gDims.insertAdjacentHTML("beforeend",
+  dimV(X(hbb) + 30, Y(y3), Y(y4), 18, `ht = ${d.ht}`)
+);
+
+gDims.insertAdjacentHTML("beforeend",
+  dimV(X(hbb) + 30, Y(y4), Y(y5), 18, `tt = ${d.tt}`)
+);
     // labels
     gDims.insertAdjacentHTML("beforeend", `
       <text x="18" y="30" fill="rgba(255,255,255,.85)" font-size="14">D=${d.D} mm</text>
