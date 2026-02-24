@@ -181,12 +181,19 @@
       <div class="svgBox" style="margin-top:10px;">
         <svg id="svg" viewBox="0 0 900 520" width="100%" height="520" xmlns="http://www.w3.org/2000/svg">
           <!-- Marker defs moved HERE (safe) -->
-          <defs>
-            <marker id="arr" markerWidth="10" markerHeight="10" refX="6" refY="3"
-              orient="auto" markerUnits="strokeWidth">
-              <path d="M0,0 L6,3 L0,6 Z" fill="rgba(255,255,255,.85)" />
-            </marker>
-          </defs>
+         <defs>
+  <!-- Arrow for START (points inward) -->
+  <marker id="arrStart" markerWidth="10" markerHeight="10" refX="6" refY="3"
+    orient="auto" markerUnits="strokeWidth">
+    <path d="M6,0 L0,3 L6,6 Z" fill="rgba(255,255,255,.85)" />
+  </marker>
+
+  <!-- Arrow for END (points inward) -->
+  <marker id="arrEnd" markerWidth="10" markerHeight="10" refX="0" refY="3"
+    orient="auto" markerUnits="strokeWidth">
+    <path d="M0,0 L6,3 L0,6 Z" fill="rgba(255,255,255,.85)" />
+  </marker>
+</defs>
 
           <g id="shape"></g>
           <g id="axis"></g>
@@ -357,7 +364,7 @@
       ${svgLine(x2,y,x2,yExtTop)}
       <line x1="${x1}" y1="${yExtTop}" x2="${x2}" y2="${yExtTop}"
         stroke="rgba(255,255,255,.8)" stroke-width="2"
-        marker-start="url(#arr)" marker-end="url(#arr)"/>
+        marker-start="url(#arrStart)" marker-end="url(#arrEnd)"/>
       ${svgText((x1+x2)/2, yExtTop-6, label)}
     `;
   }
@@ -368,7 +375,7 @@
       ${svgLine(x,y2,xExt,y2)}
       <line x1="${xExt}" y1="${y1}" x2="${xExt}" y2="${y2}"
         stroke="rgba(255,255,255,.8)" stroke-width="2"
-        marker-start="url(#arr)" marker-end="url(#arr)"/>
+        marker-start="url(#arrStart)" marker-end="url(#arrEnd)"/>
       ${svgText(xExt+6, (y1+y2)/2 + 5, label, "start")}
     `;
   }
