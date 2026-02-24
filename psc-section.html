@@ -358,27 +358,37 @@
       font-size="14" text-anchor="${anchor}" font-family="system-ui, Arial">${txt}</text>`;
   }
   function dimH(x1, x2, y, ext=18, label=""){
-    const yExtTop = y - ext;
-    return `
-      ${svgLine(x1,y,x1,yExtTop)}
-      ${svgLine(x2,y,x2,yExtTop)}
-      <line x1="${x1}" y1="${yExtTop}" x2="${x2}" y2="${yExtTop}"
-        stroke="rgba(255,255,255,.8)" stroke-width="2"
-        marker-start="url(#arrStart)" marker-end="url(#arrEnd)"/>
-      ${svgText((x1+x2)/2, yExtTop-6, label)}
-    `;
-  }
-  function dimV(x, y1, y2, ext=18, label=""){
-    const xExt = x + ext;
-    return `
-      ${svgLine(x,y1,xExt,y1)}
-      ${svgLine(x,y2,xExt,y2)}
-      <line x1="${xExt}" y1="${y1}" x2="${xExt}" y2="${y2}"
-        stroke="rgba(255,255,255,.8)" stroke-width="2"
-        marker-start="url(#arrStart)" marker-end="url(#arrEnd)"/>
-      ${svgText(xExt+6, (y1+y2)/2 + 5, label, "start")}
-    `;
-  }
+
+  const tick = 8; // slash size
+
+  return `
+    ${svgLine(x1,y,x1,y-ext)}
+    ${svgLine(x2,y,x2,y-ext)}
+
+    ${svgLine(x1-tick,y-ext+tick,x1+tick,y-ext-tick)}
+    ${svgLine(x2-tick,y-ext+tick,x2+tick,y-ext-tick)}
+
+    ${svgLine(x1,y-ext,x2,y-ext)}
+
+    ${svgText((x1+x2)/2, y-ext-6, label)}
+  `;
+}
+function dimV(x, y1, y2, ext=18, label=""){
+
+  const tick = 8;
+
+  return `
+    ${svgLine(x,y1,x+ext,y1)}
+    ${svgLine(x,y2,x+ext,y2)}
+
+    ${svgLine(x+ext-tick,y1-tick,x+ext+tick,y1+tick)}
+    ${svgLine(x+ext-tick,y2-tick,x+ext+tick,y2+tick)}
+
+    ${svgLine(x+ext,y1,x+ext,y2)}
+
+    ${svgText(x+ext+6, (y1+y2)/2+5, label, "start")}
+  `;
+}
 
   function draw(res){
     if (!res) return;
