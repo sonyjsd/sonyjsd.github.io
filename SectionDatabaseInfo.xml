@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<SectionDatabaseInfo>
+  <Categories>
+    <Category ID="1" Name="Rolled Steel"/>
+    <Category ID="2" Name="Coldformed Steel"/>
+    <Category ID="3" Name="Aluminum"/>
+    <Category ID="4" Name="Timber"/>
+    <Category ID="5" Name="Steel Joist"/>
+  </Categories>
+  <Countries>
+    <Country ID="1"  CategoryID="1" DefaultDbName="AISCSections"                 DisplayName="USA"               Name="American"/>
+    <Country ID="2"  CategoryID="1" DefaultDbName="AustralianSections"           DisplayName="Australia"         Name="Australian"/>
+    <Country ID="3"  CategoryID="1" DefaultDbName="BritishSections"              DisplayName="Britain"           Name="British"/>
+    <Country ID="4"  CategoryID="1" DefaultDbName="CanadianSections"             DisplayName="Canada"            Name="Canadian"/>
+    <Country ID="5"  CategoryID="1" DefaultDbName="ChineseSections"              DisplayName="China"             Name="Chinese"/>
+    <Country ID="6"  CategoryID="1" DefaultDbName="DutchSections"                DisplayName="Netherlands"       Name="Dutch"/>
+    <Country ID="7"  CategoryID="1" DefaultDbName="EuropeanSections"             DisplayName="Europe"            Name="European"/>
+    <Country ID="8"  CategoryID="1" DefaultDbName="FrenchSections"               DisplayName="France"            Name="French"/>
+    <Country ID="9"  CategoryID="1" DefaultDbName="GermanSections"               DisplayName="Germany"           Name="German"/>
+    <Country ID="10" CategoryID="1" DefaultDbName="IndianSections"               DisplayName="India"             Name="Indian"/>
+    <Country ID="11" CategoryID="1" DefaultDbName="JapaneseSections"             DisplayName="Japan"             Name="Japanese"/>
+    <Country ID="12" CategoryID="1" DefaultDbName="RussianSections"              DisplayName="Russia"            Name="Russian"/>
+    <Country ID="13" CategoryID="1" DefaultDbName="SouthAfricanSections"         DisplayName="South Africa"      Name="South African"/>
+    <Country ID="14" CategoryID="1" DefaultDbName="SpanishSections"              DisplayName="Spain"             Name="Spanish"/>
+    <Country ID="15" CategoryID="1" DefaultDbName="VenezuelanSections"           DisplayName="Venezuela"         Name="Venezuelan"/>
+    <Country ID="16" CategoryID="1" DefaultDbName="KoreanSections"               DisplayName="South Korea"       Name="South Korean"/>
+    <Country ID="17" CategoryID="3" DefaultDbName="AluminumSections"             DisplayName="USA"               Name="American"/>
+    <Country ID="18" CategoryID="2" DefaultDbName="USColdFormedSections"         DisplayName="USA"               Name="American"/>
+    <Country ID="19" CategoryID="2" DefaultDbName="ISColdFormedSections"         DisplayName="India"             Name="Indian"/>	  
+    <Country ID="20" CategoryID="1" DefaultDbName="MexicanSteelTables"           DisplayName="Mexico"            Name="Mexican"/>
+    <Country ID="21" CategoryID="5" DefaultDbName="AISCSteelJoists"              DisplayName="USA"               Name="American"/>
+    <Country ID="22" CategoryID="4" DefaultDbName="AITCTimberSections"           DisplayName="USA"               Name="American"/>
+    <Country ID="23" CategoryID="2" DefaultDbName="LysaghtColdFormedSections"    DisplayName="Lysaght"           Name="Lysaght"/>
+    <Country ID="24" CategoryID="2" DefaultDbName="BSColdFormedSections"         DisplayName="Britain"           Name="British"/>
+    <Country ID="25" CategoryID="4" DefaultDbName="CanadianTimberSections"       DisplayName="Canada"            Name="Canadian"/>
+    <Country ID="26" CategoryID="2" DefaultDbName="ButlerColdFormedSections"     DisplayName="Butler"            Name="Butler"/>
+    <Country ID="27" CategoryID="2" DefaultDbName="KingspanColdFormedSections"   DisplayName="Kingspan"          Name="Kingspan"/>
+    <Country ID="28" CategoryID="2" DefaultDbName="RCecoColdFormedSections"      DisplayName="Robertson Ceco"    Name="Robertson Ceco"/>
+    <Country ID="29" CategoryID="2" DefaultDbName="JapaneseColdFormedSections"   DisplayName="Japan"             Name="Japanese"/>
+    <Country ID="30" CategoryID="2" DefaultDbName="AustralianColdFormedSections" DisplayName="Australia"         Name="Australian"/>
+    <Country ID="31" CategoryID="2" DefaultDbName="GOSTColdFormedSections"       DisplayName="Russia"            Name="Russian"/>
+    <Country ID="32" CategoryID="1" DefaultDbName="STO_ASChMSections"            DisplayName="STO ASChM"         Name="RussianSTOASChM"/>
+    <Country ID="33" CategoryID="1" DefaultDbName="JindalSections"               DisplayName="Jindal"            Name="Jindal"/>
+    <Country ID="34" CategoryID="2" DefaultDbName="EuropeanColdFormedSections"   DisplayName="Europe"            Name="European"/>
+    <Country ID="35" CategoryID="1" DefaultDbName="TataStructuraSections"        DisplayName="TataStructura"     Name="TataStructura"/>
+    <Country ID="36" CategoryID="1" DefaultDbName="BrazilSections"               DisplayName="Brazil"            Name="Brazilian"/>
+    <Country ID="37" CategoryID="1" DefaultDbName="APLApolloTubesSections"       DisplayName="APLApolloTubes"    Name="APLApolloTubes"/>
+  </Countries>
+  <Specifications>
+    <Specification ID="1"  KeyName="ST" DisplayName="Single Section from Table"            Shape="Beam"/>
+    <Specification ID="2"  KeyName="T"  DisplayName="Tee Section Cut from Beam"            Shape="Beam"/>
+    <Specification ID="3"  KeyName="D"  DisplayName="Double Profile"                       Shape="Beam"/>
+    <Specification ID="4"  KeyName="CM" DisplayName="Composite Section"                    Shape="Beam"/>
+    <Specification ID="5"  KeyName="TC" DisplayName="Top Cover Plate"                      Shape="Beam"/>
+    <Specification ID="6"  KeyName="BC" DisplayName="Bottom Cover Plate"                   Shape="Beam"/>
+    <Specification ID="7"  KeyName="TB" DisplayName="Top &amp; Bottom Cover Plate"         Shape="Beam"/>
+    <Specification ID="8"  KeyName="ST" DisplayName="Single Section from Table"            Shape="Channel"/>
+    <Specification ID="9"  KeyName="D"  DisplayName="Double Channel - Back to Back"        Shape="Channel"/>
+    <Specification ID="10" KeyName="FR" DisplayName="Double Channel - Front to Front"      Shape="Channel"/>
+    <Specification ID="11" KeyName="ST" DisplayName="Single Section from Table"            Shape="Angle"/>
+    <Specification ID="12" KeyName="RA" DisplayName="Single Angle w/Reverse Y-Z Axis"      Shape="Angle"/>
+    <Specification ID="13" KeyName="LD" DisplayName="Long Leg Back to Back, Double Angle"  Shape="Angle"/>
+    <Specification ID="14" KeyName="SD" DisplayName="Short Leg Back to Back, Double Angle" Shape="Angle"/>
+    <Specification ID="15" KeyName="SA" DisplayName="Star angle arrangement, Double Angle" Shape="Angle"/>
+  </Specifications>
+</SectionDatabaseInfo>

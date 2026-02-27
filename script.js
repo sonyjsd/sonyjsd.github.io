@@ -23,6 +23,28 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const steelBtn = document.getElementById('nav-steel-btn');
+    if (steelBtn) {
+        steelBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchView('steel-view');
+        });
+    }
+
+    const steelBackBtn = document.getElementById('steel-back-btn');
+    if (steelBackBtn) {
+        steelBackBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchView('home-view');
+        });
+    }
+
+    // Attach mouse pan/zoom to SVGs
+    const pscSvg = document.getElementById('svg');
+    if (pscSvg) attachPanZoom(pscSvg, 'psc');
+    const initialSteelSvg = document.getElementById('steel-svg');
+    if (initialSteelSvg) attachPanZoom(initialSteelSvg, 'steel');
+
     // Initialize calculator UI
     if (document.getElementById("calcBtn")) {
         document.getElementById("calcBtn").addEventListener("click", updateUI);
@@ -58,8 +80,474 @@ function switchView(viewId) {
     if (viewId === 'calc-view') {
         updateUI();
     }
+    if (viewId === 'steel-view') {
+        initSteelDB();
+    }
     // Scroll to top when switching views
     window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// --- Steel Database Logic (SQLite via sql.js) ---
+let steelDbInitialized = false;
+let currentSQLDB = null;
+let currentUnits = null; // Stores unit metadata from DB
+let isMetric = true;     // UI Toggle state
+
+// Shared pan/zoom state for SVGs
+const panZoomStates = {
+    psc: { zoom: 1, panX: 0, panY: 0 },
+    steel: { zoom: 1, panX: 0, panY: 0 }
+};
+
+function attachPanZoom(svg, key) {
+    if (!svg || !panZoomStates[key]) return;
+
+    const state = panZoomStates[key];
+    let isDragging = false;
+    let lastX = 0;
+    let lastY = 0;
+
+    function applyTransform() {
+        svg.style.transformOrigin = '50% 50%';
+        svg.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.zoom})`;
+    }
+
+    applyTransform();
+    svg.style.cursor = 'grab';
+
+    svg.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const factor = e.deltaY < 0 ? 1.1 : 1 / 1.1;
+        const newZoom = Math.min(4, Math.max(0.4, state.zoom * factor));
+        state.zoom = newZoom;
+        applyTransform();
+    }, { passive: false });
+
+    svg.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        lastX = e.clientX;
+        lastY = e.clientY;
+        svg.style.cursor = 'grabbing';
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const dx = e.clientX - lastX;
+        const dy = e.clientY - lastY;
+        lastX = e.clientX;
+        lastY = e.clientY;
+        state.panX += dx;
+        state.panY += dy;
+        applyTransform();
+    });
+
+    window.addEventListener('mouseup', () => {
+        if (!isDragging) return;
+        isDragging = false;
+        svg.style.cursor = 'grab';
+    });
+}
+
+async function initSteelDB() {
+    if (steelDbInitialized) return;
+
+    const stdSelect = document.getElementById('steel-standard');
+    const shapeSelect = document.getElementById('steel-shape');
+    const desSelect = document.getElementById('steel-designation');
+    const unitSelect = document.getElementById('steel-units');
+
+    // Populate standards from databases.js (steelDBs global var)
+    if (typeof steelDBs === 'undefined') {
+        document.getElementById('steel-props-body').innerHTML = `<tr><td class="muted">databases.js not found. Run builder script.</td></tr>`;
+        return;
+    }
+
+    const standards = Object.keys(steelDBs).sort();
+    stdSelect.innerHTML = standards.map(s => `<option value="${s}">${s}</option>`).join('');
+
+    // Load SQL.js
+    let SQL;
+    try {
+        SQL = await initSqlJs({
+            locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
+        });
+    } catch (e) {
+        console.error("Failed to init sql.js", e);
+        return;
+    }
+
+    // Convert base64 to Uint8Array
+    function b64ToUint8Array(b64) {
+        const binString = atob(b64);
+        const size = binString.length;
+        const bytes = new Uint8Array(size);
+        for (let i = 0; i < size; i++) {
+            bytes[i] = binString.charCodeAt(i);
+        }
+        return bytes;
+    }
+
+    function loadDatabase(dbName) {
+        if (currentSQLDB) {
+            currentSQLDB.close();
+        }
+
+        const b64 = steelDBs[dbName];
+        if (!b64) return;
+
+        currentSQLDB = new SQL.Database(b64ToUint8Array(b64));
+
+        // Load Units Metadata
+        currentUnits = {};
+        try {
+            const res = currentSQLDB.exec("SELECT * FROM 'Field Units' LIMIT 1;");
+            if (res.length > 0) {
+                const cols = res[0].columns;
+                const vals = res[0].values[0];
+                cols.forEach((c, i) => currentUnits[c] = vals[i]);
+            }
+        } catch (e) { console.log('No unit table found.'); }
+
+        updateSteelShapes(shapeSelect, desSelect);
+    }
+
+    stdSelect.addEventListener('change', () => loadDatabase(stdSelect.value));
+    shapeSelect.addEventListener('change', () => updateSteelDesignations(desSelect, shapeSelect.value));
+    desSelect.addEventListener('change', () => renderSteelProperties(desSelect.value, shapeSelect.value));
+    unitSelect.addEventListener('change', () => {
+        isMetric = unitSelect.value === 'Metric';
+        renderSteelProperties(desSelect.value, shapeSelect.value);
+    });
+
+    // Trigger initial population
+    if (standards.length > 0) {
+        loadDatabase(standards[0]);
+    }
+    steelDbInitialized = true;
+}
+
+function updateSteelShapes(shapeSelect, desSelect) {
+    if (!currentSQLDB) return;
+
+    // Find valid tables
+    const ignore = ['DBInfo', 'Field Units', 'sqlite_sequence'];
+    const q = "SELECT name FROM sqlite_master WHERE type='table';";
+    const res = currentSQLDB.exec(q);
+
+    let shapes = [];
+    if (res.length > 0) {
+        shapes = res[0].values.map(r => r[0]).filter(t => !ignore.includes(t));
+    }
+
+    shapeSelect.innerHTML = shapes.map(s => `<option value="${s}">${s}</option>`).join('');
+    if (shapes.length > 0) {
+        updateSteelDesignations(desSelect, shapes[0]);
+    } else {
+        desSelect.innerHTML = '';
+        document.getElementById('steel-props-body').innerHTML = `<tr><td class="muted">No tables found in DB.</td></tr>`;
+    }
+}
+
+function updateSteelDesignations(desSelect, shape) {
+    if (!currentSQLDB || !shape) return;
+    try {
+        const q = `SELECT Name FROM '${shape}' ORDER BY RECNO ASC;`;
+        const res = currentSQLDB.exec(q);
+
+        if (res.length > 0) {
+            const desigs = res[0].values.map(r => r[0]);
+            desSelect.innerHTML = desigs.map(d => `<option value="${d}">${d}</option>`).join('');
+            if (desigs.length > 0) {
+                renderSteelProperties(desigs[0], shape);
+            }
+        }
+    } catch (e) {
+        desSelect.innerHTML = '';
+        console.error(e);
+    }
+}
+
+function autoConvert(val, nativeUnit, toMetric) {
+    if (!val || isNaN(val)) return { v: val, u: nativeUnit };
+
+    let v = parseFloat(val);
+    let u = (nativeUnit || '').trim().replace('^2', '2').replace('^3', '3').replace('^4', '4');
+
+    const isImperialUnit = u.startsWith('in') || u.includes('lb') || u.includes('kip');
+    const isMetricUnit = u.startsWith('mm') || u.startsWith('cm') || u.startsWith('m') || u.includes('kg') || u.includes('kN');
+
+    if (toMetric && isMetricUnit) return { v: v.toFixed(2), u: u.replace('2', '²').replace('3', '³').replace('4', '⁴') };
+    if (!toMetric && isImperialUnit) return { v: v.toFixed(3), u: u.replace('2', '²').replace('3', '³').replace('4', '⁴') };
+
+    if (toMetric && isImperialUnit) {
+        if (u === 'in') { v *= 25.4; u = 'mm'; }
+        else if (u === 'in2') { v *= 6.4516; u = 'cm²'; }
+        else if (u === 'in3') { v *= 16.3871; u = 'cm³'; }
+        else if (u === 'in4') { v *= 41.6231; u = 'cm⁴'; }
+        else if (u === 'lbs/ft' || u === 'lb/ft') { v *= 1.48816; u = 'kg/m'; }
+        else if (u === 'kips/ft' || u === 'kip/ft') { v *= 14.5939; u = 'kN/m'; }
+        return { v: v.toFixed(2), u };
+    }
+
+    if (!toMetric && isMetricUnit) {
+        if (u === 'mm') { v /= 25.4; u = 'in'; }
+        else if (u === 'cm') { v /= 2.54; u = 'in'; }
+        else if (u === 'cm2') { v /= 6.4516; u = 'in²'; }
+        else if (u === 'cm3') { v /= 16.3871; u = 'in³'; }
+        else if (u === 'cm4') { v /= 41.6231; u = 'in⁴'; }
+        else if (u === 'kg/m') { v /= 1.48816; u = 'lb/ft'; }
+        else if (u === 'kN/m') { v /= 14.5939; u = 'kip/ft'; }
+        return { v: v.toFixed(3), u };
+    }
+
+    return { v: v.toFixed(2), u: u.replace('2', '²').replace('3', '³').replace('4', '⁴') };
+}
+
+function drawDynamicSVG(shapeName, p) {
+    // Normalize shape name for robust matching across different databases
+    const s = shapeName.toLowerCase();
+    const norm = s.replace(/[^a-z0-9]/g, '');
+
+    // Safely parse properties
+    const D = p.D ? parseFloat(p.D.v) : (p.OD ? parseFloat(p.OD.v) : 100);
+    const Bf = p.Bf ? parseFloat(p.Bf.v) : (p.B ? parseFloat(p.B.v) : 50);
+    const Tf = p.Tf ? parseFloat(p.Tf.v) : (p.T ? parseFloat(p.T.v) : 10);
+    const Tw = p.Tw ? parseFloat(p.Tw.v) : 5;
+
+    // ViewBox scaling based on max dimension
+    const maxDim = Math.max(D, Bf) || 100;
+    // Increase padding slightly so that dynamically scaled text never clips off-screen
+    const pad = maxDim * 0.65;
+    const vW = maxDim + pad * 2;
+    const vH = maxDim + pad * 2;
+    // Shift origin so (0,0) is center
+    const viewBox = `viewBox="-${vW / 2} -${vH / 2} ${vW} ${vH}"`;
+
+    // Calculate dynamic scaling parameters for SVG features proportional to geometry
+    const strokeW = Math.max(maxDim * 0.012, 0.5);
+    const dimStrokeW = Math.max(maxDim * 0.008, 0.3);
+    const fontSize = Math.max(maxDim * 0.075, 3);
+    const arrSize = Math.max(maxDim * 0.045, 2);
+    const dash = `${maxDim * 0.03},${maxDim * 0.03}`;
+
+    const style = `fill="var(--shapeFill)" stroke="var(--shapeStroke)" stroke-width="${strokeW}" stroke-linejoin="round"`;
+    const dimStyle = `stroke="var(--muted)" stroke-width="${dimStrokeW}" stroke-dasharray="${dash}"`;
+    // Add text background via a filter to make text pop over the drawing. Removing 'px' forces relative scaling.
+    const textStyle = `fill="var(--text)" font-size="${fontSize}" font-weight="500" font-family="sans-serif" text-anchor="middle" dominant-baseline="middle" filter="url(#solid)"`;
+    const arrStyle = `fill="var(--muted)"`;
+
+    let svg = `<svg id="steel-svg" ${viewBox} width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">`;
+    svg += `<defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="${arrSize}" markerHeight="${arrSize}" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+            <path d="M 0 0 L 10 5 L 0 10 z" ${arrStyle}/>
+        </marker>
+        <filter x="-0.15" y="-0.15" width="1.3" height="1.3" id="solid">
+            <feFlood flood-color="rgba(20,25,45,0.9)" result="bg"/>
+            <feMerge>
+                <feMergeNode in="bg"/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>
+    </defs>`;
+
+    // Helper to draw a dimension line
+    function drawDim(x1, y1, x2, y2, labelText, pt, offset, isVertical) {
+        if (!pt || !pt.v) return '';
+        const lbl = pt.v + ' ' + pt.u;
+
+        let dx = isVertical ? offset : 0;
+        let dy = isVertical ? 0 : offset;
+
+        let tx = (x1 + x2) / 2 + dx;
+        let ty = (y1 + y2) / 2 + dy;
+
+        // Shift text proportionally by font size to avoid overlapping the exact axis line
+        const shiftAmt = fontSize * 1.05;
+        if (isVertical) tx += (offset > 0 ? shiftAmt : -shiftAmt);
+        if (!isVertical) ty += (offset > 0 ? shiftAmt : -shiftAmt);
+
+        return `
+            <line x1="${x1}" y1="${y1}" x2="${x1 + dx}" y2="${y1 + dy}" ${dimStyle} />
+            <line x1="${x2}" y1="${y2}" x2="${x2 + dx}" y2="${y2 + dy}" ${dimStyle} />
+            <line x1="${x1 + dx}" y1="${y1 + dy}" x2="${x2 + dx}" y2="${y2 + dy}" stroke="var(--muted)" stroke-width="${dimStrokeW}" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+            <text x="${tx}" y="${ty}" ${textStyle}>${lbl}</text>
+        `;
+    }
+
+    // Wide‑flange / I-beam family
+    if (
+        // Common wide‑flange / I‑beam labels
+        s.includes('i shape') || s.includes('w shape') || s.includes('s shape') || s.includes('m shape') ||
+        s.includes('npb') || s.includes('wpb') || s.includes('beam') ||
+        // Some databases (e.g. AISC) may use "B Shape" or similar for beam tables
+        s.includes('b shape') ||
+        // Normalized variants without spaces / hyphens
+        norm.includes('ishape') || norm.includes('wshape') || norm.includes('bshape') ||
+        norm.includes('ipe') || norm.includes('heb')
+    ) {
+        const curD = D / 2; const curB = Bf / 2; const curTf = Tf; const curTw = Tw / 2;
+        svg += `<path d="
+            M -${curB} -${curD} 
+            L  ${curB} -${curD} 
+            L  ${curB} -${curD - curTf} 
+            L  ${curTw} -${curD - curTf} 
+            L  ${curTw}  ${curD - curTf} 
+            L  ${curB}  ${curD - curTf} 
+            L  ${curB}  ${curD} 
+            L -${curB}  ${curD} 
+            L -${curB}  ${curD - curTf} 
+            L -${curTw}  ${curD - curTf} 
+            L -${curTw} -${curD - curTf} 
+            L -${curB} -${curD - curTf} Z" ${style}/>`;
+
+        svg += drawDim(-curB, -curD, -curB, curD, 'D', p.D, -pad * 0.5, true);
+        svg += drawDim(-curB, curD, curB, curD, 'Bf', p.Bf, pad * 0.3, false);
+        svg += drawDim(curB, -curD, curB, -curD + curTf, 'Tf', p.Tf, pad * 0.3, true);
+        svg += drawDim(-curTw, 0, curTw, 0, 'Tw', p.Tw, -pad * 0.2, false);
+
+        // Channels
+    } else if (s.includes('channel') || s.includes('c shape') || norm.includes('cshape')) {
+        const curD = D / 2; const curB = Bf; const curTf = Tf; const curTw = Tw;
+        const oX = curB / 2;
+        svg += `<path d="
+            M -${oX} -${curD} 
+            L  ${curB - oX} -${curD} 
+            L  ${curB - oX} -${curD - curTf} 
+            L -${oX - curTw} -${curD - curTf} 
+            L -${oX - curTw}  ${curD - curTf} 
+            L  ${curB - oX}  ${curD - curTf} 
+            L  ${curB - oX}  ${curD} 
+            L -${oX}  ${curD} Z" ${style}/>`;
+
+        svg += drawDim(-oX, -curD, -oX, curD, 'D', p.D, -pad * 0.5, true);
+        svg += drawDim(-oX, curD, curB - oX, curD, 'Bf', p.Bf || p.B, pad * 0.3, false);
+        svg += drawDim(-oX, 0, -oX + curTw, 0, 'Tw', p.Tw, -pad * 0.3, false);
+        svg += drawDim(curB - oX, -curD, curB - oX, -curD + curTf, 'Tf', p.Tf, pad * 0.3, true);
+
+        // Angles
+    } else if (s.includes('angle') || norm.includes('angle') || norm.startsWith('l')) {
+        const curD = D; const curB = Bf; const curT = Tf;
+        const ox = curB / 2; const oy = curD / 2;
+        svg += `<path d="
+            M -${ox} -${oy}
+            L -${ox - curT} -${oy}
+            L -${ox - curT}  ${oy - curT}
+            L  ${curB - ox}  ${oy - curT}
+            L  ${curB - ox}  ${oy}
+            L -${ox}  ${oy} Z" ${style}/>`;
+
+        svg += drawDim(-ox, -oy, -ox, oy, 'D', p.D, -pad * 0.5, true);
+        svg += drawDim(-ox, oy, curB - ox, oy, 'B', p.B || p.Bf, pad * 0.3, false);
+        svg += drawDim(-ox, -oy, -ox + curT, -oy, 'T', p.T || p.Tf || p.Tw, -pad * 0.3, false);
+
+        // Rectangular / square tubes
+    } else if (s.includes('tube') || s.includes('box') || norm.includes('rhs') || norm.includes('shs')) {
+        const curD = D / 2; const curB = Bf / 2; const curT = Tf;
+        svg += `
+            <path d="M -${curB} -${curD} L ${curB} -${curD} L ${curB} ${curD} L -${curB} ${curD} Z" ${style} fill="none"/>
+            <path d="M -${curB - curT} -${curD - curT} L ${curB - curT} -${curD - curT} L ${curB - curT} ${curD - curT} L -${curB - curT} ${curD - curT} Z" ${style} fill="none"/>
+            <path d="M -${curB} -${curD} L ${curB} -${curD} L ${curB} ${curD} L -${curB} ${curD} Z M -${curB - curT} -${curD - curT} L -${curB - curT} ${curD - curT} L ${curB - curT} ${curD - curT} L ${curB - curT} -${curD - curT} Z" fill="var(--shapeFill)" fill-rule="evenodd" stroke="none"/>
+        `;
+        svg += drawDim(-curB, -curD, -curB, curD, 'D', p.D, -pad * 0.5, true);
+        svg += drawDim(-curB, curD, curB, curD, 'B', p.B || p.Bf, pad * 0.3, false);
+        svg += drawDim(curB - curT, 0, curB, 0, 'T', p.T || p.Tf || p.Tw, pad * 0.4, false);
+
+        // Circular hollow sections / pipes
+    } else if (s.includes('pipe') || s.includes('chs') || norm.includes('circularhollow')) {
+        const r = D / 2; const r2 = r - Tw;
+        svg += `
+            <circle cx="0" cy="0" r="${r}" fill="none" ${style}/>
+            <circle cx="0" cy="0" r="${r2}" fill="none" ${style}/>
+            <path d="M 0 -${r} A ${r} ${r} 0 1 1 -0.01 -${r} M 0 -${r2} A ${r2} ${r2} 0 1 0 -0.01 -${r2} Z" fill="var(--shapeFill)" stroke="none"/>
+        `;
+        svg += drawDim(-r, r + pad * 0.1, r, r + pad * 0.1, 'OD', p.OD || p.D, pad * 0.3, false);
+        svg += drawDim(r2, 0, r, 0, 'Tw', p.Tw || p.T || p.Tf, pad * 0.3, true);
+
+    } else if (s.includes('t shape')) {
+        const curD = D; const curB = Bf / 2; const curTf = Tf; const curTw = Tw / 2;
+        const oy = curD / 2;
+        svg += `<path d="
+            M -${curB} -${oy} 
+            L  ${curB} -${oy} 
+            L  ${curB} -${oy - curTf} 
+            L  ${curTw} -${oy - curTf} 
+            L  ${curTw}  ${oy} 
+            L -${curTw}  ${oy} 
+            L -${curTw} -${oy - curTf} 
+            L -${curB} -${oy - curTf} Z" ${style}/>`;
+
+        svg += drawDim(-curB, -oy, -curB, oy, 'D', p.D, -pad * 0.5, true);
+        svg += drawDim(-curB, -oy, curB, -oy, 'Bf', p.Bf || p.B, -pad * 0.3, false);
+        svg += drawDim(curB, -oy, curB, -oy + curTf, 'Tf', p.Tf, pad * 0.3, true);
+        svg += drawDim(-curTw, oy - pad * 0.1, curTw, oy - pad * 0.1, 'Tw', p.Tw, pad * 0.3, false);
+
+    } else {
+        svg += `<text x="0" y="0" ${textStyle}>Profile Preview Unavailable</text>`;
+    }
+
+    svg += `</svg>`;
+    return svg;
+}
+
+function renderSteelProperties(designation, shape) {
+    if (!currentSQLDB || !designation || !shape) return;
+
+    const tbody = document.getElementById('steel-props-body');
+    const svgBox = document.querySelector('.svgBox');
+
+    try {
+        const q = `SELECT * FROM '${shape}' WHERE Name='${designation}' LIMIT 1;`;
+        const res = currentSQLDB.exec(q);
+
+        if (res.length > 0) {
+            const cols = res[0].columns;
+            const vals = res[0].values[0];
+
+            let html = '';
+            let propsForSvg = {};
+
+            for (let i = 0; i < cols.length; i++) {
+                const key = cols[i];
+                if (key === 'RECNO' || key === 'Name' || key === 'StaadName') continue;
+
+                const valRaw = vals[i];
+                let unitRaw = currentUnits ? (currentUnits[`Field${i}`] || '') : '';
+
+                // Database schema safety override for common properties that databases mislabel.
+                // Many databases list Dimensions as Area or vice versa in their 'Field Units' table.
+                if (key === 'AX' || key === 'A' || key === 'Area') {
+                    if (unitRaw && !unitRaw.includes('2')) unitRaw += '2';
+                } else if (key === 'D' || key === 'B' || key === 'Bf' || key === 'T' || key === 'Tf' || key === 'Tw' || key === 'OD' || key === 'ID' || key === 't' || key === 'b') {
+                    if (unitRaw && unitRaw.includes('2')) unitRaw = unitRaw.replace('2', '');
+                }
+
+                const f = autoConvert(valRaw, unitRaw, isMetric);
+
+                // Save for SVG generator
+                propsForSvg[key] = f;
+
+                html += `<tr>
+                    <td style="font-weight: 600; padding: 8px 0; border-bottom: 1px solid var(--line);">${key}</td>
+                    <td style="padding: 8px 0; border-bottom: 1px solid var(--line); text-align: right;">${f.v} <span class="muted" style="font-size:11px;">${f.u}</span></td>
+                </tr>`;
+            }
+            tbody.innerHTML = html;
+
+            // Generate dynamic SVG into the steel view's SVG box only
+            const svgBox = document.querySelector('#steel-view .svgBox');
+            if (svgBox) {
+                svgBox.innerHTML = drawDynamicSVG(shape, propsForSvg);
+                const newSvg = document.getElementById('steel-svg');
+                if (newSvg) attachPanZoom(newSvg, 'steel');
+            }
+
+        } else {
+            tbody.innerHTML = `<tr><td class="muted">Not found.</td></tr>`;
+        }
+    } catch (e) {
+        tbody.innerHTML = `<tr><td class="muted">Error reading properties.</td></tr>`;
+        console.error(e);
+    }
 }
 
 // --- Calculator Logic ---
@@ -195,32 +683,40 @@ function svgLine(x1, y1, x2, y2, stroke = "rgba(255,255,255,.7)", w = 2, dash = 
       stroke="${stroke}" stroke-width="${w}" ${dash ? `stroke-dasharray="${dash}"` : ``} />`;
 }
 
-function svgText(x, y, txt, anchor = "middle") {
+function svgText(x, y, txt, anchor = "middle", transform = "") {
     return `<text x="${x}" y="${y}" fill="rgba(255,255,255,.85)"
-      font-size="14" text-anchor="${anchor}" font-family="system-ui, Arial">${txt}</text>`;
+      font-size="14" text-anchor="${anchor}" font-family="system-ui, Arial"${transform ? ` transform="${transform}"` : ""}>${txt}</text>`;
 }
 
 function dimH(x1, x2, y, ext = 18, label = "") {
-    const tick = 8;
     return `
     ${svgLine(x1, y, x1, y - ext)}
     ${svgLine(x2, y, x2, y - ext)}
-    ${svgLine(x1 - tick, y - ext + tick, x1 + tick, y - ext - tick)}
-    ${svgLine(x2 - tick, y - ext + tick, x2 + tick, y - ext - tick)}
-    ${svgLine(x1, y - ext, x2, y - ext)}
-    ${svgText((x1 + x2) / 2, y - ext - 6, label)}
+    <line x1="${x1}" y1="${y - ext}" x2="${x2}" y2="${y - ext}" stroke="rgba(255,255,255,.7)" stroke-width="2" marker-start="url(#arrStart)" marker-end="url(#arrEnd)" />
+    ${svgText((x1 + x2) / 2, y - ext - 12, label)}
   `;
 }
 
-function dimV(x, y1, y2, ext = 18, label = "") {
-    const tick = 8;
+function dimV(x, y1, y2, ext = 18, label = "", yOffset = 0) {
+    const isLeft = ext < 0;
+    const lineX = x + ext;
+    const txtX = lineX + (isLeft ? -5 : 5);
+    const txtY = (y1 + y2) / 2 + yOffset;
+
+    // Left-side dimensions (rotated) should be anchored "middle".
+    // Right-side dimensions (horizontal) should be anchored "start".
+    const anchor = isLeft ? "middle" : "start";
+
+    // Reintroduce rotation ONLY for left-side labels (ȳ, D) to keep them vertical.
+    // Right-side labels (tb, ht, etc) stay horizontal.
+    const transform = isLeft ? `rotate(-90 ${txtX} ${txtY})` : "";
+    const finalTxtY = txtY + (isLeft ? 0 : 5); // Add slight padding if horizontal
+
     return `
-    ${svgLine(x, y1, x + ext, y1)}
-    ${svgLine(x, y2, x + ext, y2)}
-    ${svgLine(x + ext - tick, y1 - tick, x + ext + tick, y1 + tick)}
-    ${svgLine(x + ext - tick, y2 - tick, x + ext + tick, y2 + tick)}
-    ${svgLine(x + ext, y1, x + ext, y2)}
-    ${svgText(x + ext + 6, (y1 + y2) / 2 + 5, label, "start")}
+    ${svgLine(x, y1, lineX, y1)}
+    ${svgLine(x, y2, lineX, y2)}
+    <line x1="${lineX}" y1="${y1}" x2="${lineX}" y2="${y2}" stroke="rgba(255,255,255,.7)" stroke-width="2" marker-start="url(#arrStart)" marker-end="url(#arrEnd)" />
+    ${svgText(txtX, finalTxtY, label, anchor, transform)}
   `;
 }
 
@@ -237,7 +733,7 @@ function draw(res) {
     gAxis.innerHTML = "";
     gDims.innerHTML = "";
 
-    const W = 900, H = 520, pad = 70;
+    const W = 900, H = 520, pad = 120;
     const maxX = Math.max(...poly.map(p => Math.abs(p.x)));
     const maxY = d.D;
 
@@ -280,16 +776,21 @@ function draw(res) {
     const xLeftWeb = X(-htw), xRightWeb = X(htw);
     const xLeftBot = X(-hbb), xRightBot = X(hbb);
 
-    gDims.insertAdjacentHTML("beforeend", dimH(xLeftTop, xRightTop, Y(y5) + 40, 18, `bt = ${d.bt} mm`));
+    // Push bt higher (more negative in Y relative to top of shape)
+    gDims.insertAdjacentHTML("beforeend", dimH(xLeftTop, xRightTop, Y(y5) - 30, 18, `bt = ${d.bt} mm`));
     gDims.insertAdjacentHTML("beforeend", dimH(xLeftWeb, xRightWeb, Y((y2 + y3) / 2) + 40, 18, `tw = ${d.tw} mm`));
-    gDims.insertAdjacentHTML("beforeend", dimH(xLeftBot, xRightBot, Y(y00) + 40, 18, `bb = ${d.bb} mm`));
+    // Push bb lower (more positive in Y relative to bottom of shape)
+    gDims.insertAdjacentHTML("beforeend", dimH(xLeftBot, xRightBot, Y(y00) + 50, 18, `bb = ${d.bb} mm`));
 
-    gDims.insertAdjacentHTML("beforeend", dimV(X(-hbb) - 60, Y(y00), Y(y5), -18, `D = ${d.D} mm`));
+    gDims.insertAdjacentHTML("beforeend", dimV(X(-hbb) - 25, Y(y00), Y(ybar), -16, `ȳ = ${fmt(ybar, 1)} mm`));
+    gDims.insertAdjacentHTML("beforeend", dimV(X(-hbb) - 75, Y(y00), Y(y5), -16, `D = ${d.D} mm`));
 
-    gDims.insertAdjacentHTML("beforeend", dimV(X(hbb) + 30, Y(y00), Y(y1), 18, `tb = ${d.tb}`));
-    gDims.insertAdjacentHTML("beforeend", dimV(X(hbb) + 30, Y(y1), Y(y2), 18, `hb = ${d.hb}`));
-    gDims.insertAdjacentHTML("beforeend", dimV(X(hbb) + 30, Y(y3), Y(y4), 18, `ht = ${d.ht}`));
-    gDims.insertAdjacentHTML("beforeend", dimV(X(hbb) + 30, Y(y4), Y(y5), 18, `tt = ${d.tt}`));
+    // Give right-side heights extra padding based on the widest footprint so the text sits wholly outside the polygon.
+    const rtPadX = X(Math.max(hbt, hbb)) + 40;
+    gDims.insertAdjacentHTML("beforeend", dimV(X(hbb), Y(y00), Y(y1), rtPadX - X(hbb), `tb = ${d.tb}`, 0));
+    gDims.insertAdjacentHTML("beforeend", dimV(X(hbt), Y(y1), Y(y2), rtPadX - X(hbt) + 50, `hb = ${d.hb}`, 0));
+    gDims.insertAdjacentHTML("beforeend", dimV(X(hbt), Y(y3), Y(y4), rtPadX - X(hbt) + 50, `ht = ${d.ht}`, 0));
+    gDims.insertAdjacentHTML("beforeend", dimV(X(hbb), Y(y4), Y(y5), rtPadX - X(hbb), `tt = ${d.tt}`, 0));
 
     gDims.insertAdjacentHTML("beforeend", `
       <text x="18" y="30" fill="rgba(255,255,255,.85)" font-size="14">D=${d.D} mm</text>

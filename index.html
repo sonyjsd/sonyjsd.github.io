@@ -1,18 +1,25 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Sony J S D — Structural Engineer</title>
-  <meta name="description" content="Professional portfolio: bridges, inspections, structural design, and engineering tools." />
-  
+  <meta name="description"
+    content="Professional portfolio: bridges, inspections, structural design, and engineering tools." />
+
   <!-- PDF libs for calculator -->
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
   <!-- External Styles -->
   <link rel="stylesheet" href="styles.css">
+
+  <!-- SQL & Steel Database -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+  <script src="databases.js"></script>
 </head>
+
 <body>
 
   <!-- HOME VIEW -->
@@ -25,6 +32,7 @@
           <a href="#work">Work</a>
           <a href="#articles">Articles</a>
           <a href="#tools">Tools</a>
+          <a href="#steel" id="nav-steel-btn">Steel DB</a>
           <a href="#contact">Contact</a>
         </div>
       </div>
@@ -88,7 +96,8 @@
             </div>
             <div class="card">
               <h3>Bridge inspection & rehabilitation support</h3>
-              <p>Field instrumentation, observations, and technical review inputs for repair/rehabilitation proposals.</p>
+              <p>Field instrumentation, observations, and technical review inputs for repair/rehabilitation proposals.
+              </p>
             </div>
             <div class="card" style="margin-top:12px;">
               <h3>Design review & analysis support</h3>
@@ -161,7 +170,8 @@
           </p>
           <div class="ctaRow">
             <a class="btn primary" href="mailto:sonyjsd@gmail.com">Email</a>
-            <a class="btn" href="https://www.linkedin.com/in/sony-j-s-d-1a79b440/" target="_blank" rel="noreferrer">LinkedIn</a>
+            <a class="btn" href="https://www.linkedin.com/in/sony-j-s-d-1a79b440/" target="_blank"
+              rel="noreferrer">LinkedIn</a>
             <a class="btn" href="https://github.com/sonyjsd" target="_blank" rel="noreferrer">GitHub</a>
           </div>
           <div class="mini" style="margin-top:10px;">© <span id="y"></span> Sony J S D</div>
@@ -268,19 +278,19 @@
 
           <div class="svgBox" style="margin-top:10px;">
             <svg id="svg" viewBox="0 0 900 520" width="100%" height="520" xmlns="http://www.w3.org/2000/svg">
-             <defs>
-      <!-- Arrow for START (points inward) -->
-      <marker id="arrStart" markerWidth="10" markerHeight="10" refX="6" refY="3"
-        orient="auto" markerUnits="strokeWidth">
-        <path d="M6,0 L0,3 L6,6 Z" fill="rgba(255,255,255,.85)" />
-      </marker>
+              <defs>
+                <!-- Arrow for START (points inward) -->
+                <marker id="arrStart" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto"
+                  markerUnits="strokeWidth">
+                  <path d="M6,0 L0,3 L6,6 Z" fill="rgba(255,255,255,.85)" />
+                </marker>
 
-      <!-- Arrow for END (points inward) -->
-      <marker id="arrEnd" markerWidth="10" markerHeight="10" refX="0" refY="3"
-        orient="auto" markerUnits="strokeWidth">
-        <path d="M0,0 L6,3 L0,6 Z" fill="rgba(255,255,255,.85)" />
-      </marker>
-    </defs>
+                <!-- Arrow for END (points inward) -->
+                <marker id="arrEnd" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto"
+                  markerUnits="strokeWidth">
+                  <path d="M0,0 L6,3 L0,6 Z" fill="rgba(255,255,255,.85)" />
+                </marker>
+              </defs>
 
               <g id="shape"></g>
               <g id="axis"></g>
@@ -292,13 +302,34 @@
             <h1>Results</h1>
             <table>
               <tbody>
-                <tr><td>Area, A</td><td id="A">—</td></tr>
-                <tr><td>Centroid from bottom, ȳ</td><td id="ybar">—</td></tr>
-                <tr><td>Ixx about centroid</td><td id="Ixx">—</td></tr>
-                <tr><td>Section modulus at top, Ztop</td><td id="Ztop">—</td></tr>
-                <tr><td>Section modulus at bottom, Zbot</td><td id="Zbot">—</td></tr>
-                <tr><td>Concrete volume per meter</td><td id="Vpm">—</td></tr>
-                <tr><td>Self weight per meter</td><td id="Wpm">—</td></tr>
+                <tr>
+                  <td>Area, A</td>
+                  <td id="A">—</td>
+                </tr>
+                <tr>
+                  <td>Centroid from bottom, ȳ</td>
+                  <td id="ybar">—</td>
+                </tr>
+                <tr>
+                  <td>Ixx about centroid</td>
+                  <td id="Ixx">—</td>
+                </tr>
+                <tr>
+                  <td>Section modulus at top, Ztop</td>
+                  <td id="Ztop">—</td>
+                </tr>
+                <tr>
+                  <td>Section modulus at bottom, Zbot</td>
+                  <td id="Zbot">—</td>
+                </tr>
+                <tr>
+                  <td>Concrete volume per meter</td>
+                  <td id="Vpm">—</td>
+                </tr>
+                <tr>
+                  <td>Self weight per meter</td>
+                  <td id="Wpm">—</td>
+                </tr>
               </tbody>
             </table>
             <div class="small">PDF includes: inputs + section graphic + results + quantity per meter.</div>
@@ -308,7 +339,76 @@
     </div>
   </div>
 
+  <!-- STEEL SECTION VIEW -->
+  <div id="steel-view" class="view hidden">
+    <div class="wrap">
+      <div class="top">
+        <div class="brand"><span class="dot"></span> Steel Section Properties Database</div>
+        <a class="btn" href="#home" id="steel-back-btn">← Back to Home</a>
+      </div>
+
+      <div class="calc-grid">
+        <!-- Inputs / Filters -->
+        <div class="panel">
+          <h1>Select Profile</h1>
+          <div class="muted">Filter by standard and shape to find the designation properties.</div>
+
+          <div class="calc-row" style="margin-top: 15px;">
+            <div class="field">
+              <label>Units</label>
+              <select id="steel-units"
+                style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid var(--line); background: rgba(0,0,0,0.1); color: var(--text);">
+                <option value="Metric">Metric (mm, cm², cm⁴)</option>
+                <option value="Imperial">Imperial (in, in², in⁴)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Database</label>
+              <select id="steel-standard"
+                style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid var(--line); background: rgba(0,0,0,0.1); color: var(--text);"></select>
+            </div>
+            <div class="field">
+              <label>Shape</label>
+              <select id="steel-shape"
+                style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid var(--line); background: rgba(0,0,0,0.1); color: var(--text);"></select>
+            </div>
+            <div class="field" style="grid-column: span 2;">
+              <label>Designation</label>
+              <select id="steel-designation"
+                style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid var(--line); background: rgba(0,0,0,0.1); color: var(--text);"></select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Output Properties -->
+        <div class="panel">
+          <h1>Properties</h1>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; margin-top: 15px;">
+            <div class="svgBox"
+              style="width: 100%; height: 350px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: rgba(0,0,0,0.2);">
+              <svg id="steel-svg" viewBox="0 0 300 300" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                <!-- SVG graphic of the section will be drawn here -->
+                <text id="steel-svg-text" x="150" y="150" fill="var(--muted)" font-size="14" text-anchor="middle">Select
+                  a section</text>
+              </svg>
+            </div>
+            <div style="max-height: 350px; overflow-y: auto; padding-right: 10px;">
+              <table style="width:100%; text-align: left; margin: 0;">
+                <tbody id="steel-props-body">
+                  <tr>
+                    <td class="muted">Select a section to view properties.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- External Scripts -->
   <script src="script.js"></script>
 </body>
+
 </html>

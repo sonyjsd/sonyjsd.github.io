@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>DB Debugger 2</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+    <script src="databases.js"></script>
+</head>
+
+<body>
+    <pre id="out"></pre>
+    <script>
+        async function run() {
+            const out = document.getElementById('out');
+
+            let SQL;
+            try {
+                SQL = await initSqlJs({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}` });
+            } catch (e) {
+                out.innerText = "Error initing SQL.js: " + e;
+                return;
+            }
+
+            const b64 = steelDBs['AISCSections'];
+            if (!b64) {
+                out.innerText = "DB not found in databases.js";
+                return;
+            }
+
+            const binString = atob(b64);
+            const size = binString.length;
+            const bytes = new Uint8Array(size);
+            for (let i = 0; i < size; i++) bytes[i] = binString.charCodeAt(i);
+
+            const db = new SQL.Database(bytes);
+
+            out.innerText += "--- Tables in DB ---\n";
+            let res = db.exec("SELECT name FROM sqlite_master WHERE type='table';");
+            if (res.length > 0) {
+                out.innerText += JSON.stringify(res[0].values.map(r => r[0]), null, 2) + "\n\n";
+            }
+
+            out.innerText += "--- 'Field Units' Columns ---\n";
+            res = db.exec("PRAGMA table_info('Field Units');");
+            if (res.length > 0) {
+                out.innerText += JSON.stringify(res[0].values.map(r => r[1]), null, 2) + "\n\n";
+            }
+
+            out.innerText += "--- 'Field Units' Data ---\n";
+            res = db.exec("SELECT * FROM 'Field Units';");
+            if (res.length > 0) {
+                out.innerText += JSON.stringify(res[0].columns, null, 2) + "\n";
+                out.innerText += JSON.stringify(res[0].values, null, 2) + "\n";
+            } else {
+                out.innerText += "No data in Field Units.";
+            }
+        }
+        run();
+    </script>
+</body>
+
+</html>

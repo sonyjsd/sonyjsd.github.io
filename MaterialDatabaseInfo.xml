@@ -1,0 +1,278 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<MaterialDatabaseInfo>
+  <Materials>
+    <Material BaseUnit="English">
+      <Name>Steel</Name>
+      <Type>STEEL</Type>
+      <Properties>
+        <Property Name="E"       Value="29000"    Unit="kip/in^2"/>
+        <Property Name="G"       Value="11200"    Unit="kip/in^2"/>
+        <Property Name="Poisson" Value="0.30"     Unit=""/>
+        <Property Name="Density" Value="0.000283" Unit="kip/in^3"/>
+        <Property Name="Alpha"   Value="6.5e-06"  Unit="/F"/>
+        <Property Name="Damp"    Value="0.03"     Unit=""/>
+        <Property Name="Fy"      Value="36"       Unit="kip/in^2"/>
+        <Property Name="Fu"      Value="58"       Unit="kip/in^2"/>
+        <Property Name="Ry"      Value="1.5"      Unit=""/>
+        <Property Name="Rt"      Value="1.2"      Unit=""/>
+        <Property Name="Fcu"     Value="0.0"      Unit="kip/in^2"/>
+      </Properties>
+    </Material>
+    <Material BaseUnit="Metric">
+      <Name>Steel</Name>
+      <Type>STEEL</Type>
+      <Properties>
+        <Property Name="E"       Value="2.05e+08"         Unit="kN/m^2"/>
+        <Property Name="G"       Value="78846153.8461538" Unit="kN/m^2"/>
+        <Property Name="Poisson" Value="0.30"             Unit=""/>
+        <Property Name="Density" Value="76.8195"          Unit="kN/m^3"/>
+        <Property Name="Alpha"   Value="1.2e-05"          Unit="/C"/>
+        <Property Name="Damp"    Value="0.03"             Unit=""/>
+        <Property Name="Fy"      Value="250000"           Unit="kN/m^2"/>
+        <Property Name="Fu"      Value="400000"           Unit="kN/m^2"/>
+        <Property Name="Ry"      Value="1.5"              Unit=""/>
+        <Property Name="Rt"      Value="1.2"              Unit=""/>
+        <Property Name="Fcu"     Value="0.0"              Unit="kN/m^2"/>
+      </Properties>
+    </Material>
+
+    <Material BaseUnit="English">
+      <Name>Concrete</Name>
+      <Type>CONCRETE</Type>
+      <Properties>
+        <Property Name="E"       Value="3150"     Unit="kip/in^2"/>
+        <Property Name="Poisson" Value="0.17"     Unit=""/>
+        <Property Name="Density" Value="8.68e-05" Unit="kip/in^3"/>
+        <Property Name="Alpha"   Value="5.5e-06"  Unit="/F"/>
+        <Property Name="Damp"    Value="0.05"     Unit=""/>
+        <Property Name="Fy"      Value="0.0"      Unit="kip/in^2"/>
+        <Property Name="Fu"      Value="0.0"      Unit="kip/in^2"/>
+        <Property Name="Ry"      Value="0.0"      Unit=""/>
+        <Property Name="Rt"      Value="0.0"      Unit=""/>
+        <Property Name="Fcu"     Value="4.0"      Unit="kip/in^2"/>
+      </Properties>
+    </Material>
+    <Material BaseUnit="Metric">
+      <Name>Concrete</Name>
+      <Type>CONCRETE</Type>
+      <Properties>
+        <Property Name="E"       Value="21718455.0" Unit="kN/m^2"/>
+        <Property Name="Poisson" Value="0.17"       Unit=""/>
+        <Property Name="Density" Value="23.561612"  Unit="kN/m^3"/>
+        <Property Name="Alpha"   Value="10.0e-6"    Unit="/C"/>
+        <Property Name="Damp"    Value="0.05"       Unit=""/>
+        <Property Name="Fy"      Value="0.0"        Unit="kN/m^2"/>
+        <Property Name="Fu"      Value="0.0"        Unit="kN/m^2"/>
+        <Property Name="Ry"      Value="0.0"        Unit=""/>
+        <Property Name="Rt"      Value="0.0"        Unit=""/>
+        <Property Name="Fcu"     Value="27579.02"   Unit="kN/m^2"/>
+      </Properties>
+    </Material>
+
+    <Material BaseUnit="English">
+      <Name>Aluminum</Name>
+      <Type>ALUMINUM</Type>
+      <Properties>
+        <Property Name="E"       Value="10000"    Unit="kip/in^2"/>
+        <Property Name="Poisson" Value="0.33"     Unit=""/>
+        <Property Name="Density" Value="9.8e-05"  Unit="kip/in^3"/>
+        <Property Name="Alpha"   Value="1.28e-05" Unit="/F"/>
+        <Property Name="Damp"    Value="0.03"     Unit=""/>
+        <Property Name="Fy"      Value="0.0"      Unit="kip/in^2"/>
+        <Property Name="Fu"      Value="0.0"      Unit="kip/in^2"/>
+        <Property Name="Ry"      Value="0.0"      Unit=""/>
+        <Property Name="Rt"      Value="0.0"      Unit=""/>
+        <Property Name="Fcu"     Value="0.0"      Unit="kip/in^2"/>
+      </Properties>
+    </Material>
+    <Material BaseUnit="Metric">
+      <Name>Aluminum</Name>
+      <Type>ALUMINUM</Type>
+      <Properties>
+        <Property Name="E"       Value="68947573.0" Unit="kN/m^2"/>
+        <Property Name="Poisson" Value="0.33"       Unit=""/>
+        <Property Name="Density" Value="26.60182"   Unit="kN/m^3"/>
+        <Property Name="Alpha"   Value="23.0E-6"    Unit="/C"/>
+        <Property Name="Damp"    Value="0.03"       Unit=""/>
+        <Property Name="Fy"      Value="0.0"        Unit="kN/m^2"/>
+        <Property Name="Fu"      Value="0.0"        Unit="kN/m^2"/>
+        <Property Name="Ry"      Value="0.0"        Unit=""/>
+        <Property Name="Rt"      Value="0.0"        Unit=""/>
+        <Property Name="Fcu"     Value="0.0"        Unit="kN/m^2"/>
+      </Properties>
+    </Material>
+
+    <Material BaseUnit="English">
+      <Name>StainlessSteel</Name>
+      <Type>STEEL</Type>
+      <Properties>
+        <Property Name="E"       Value="28000"    Unit="kip/in^2"/>
+        <Property Name="Poisson" Value="0.30"     Unit=""/>
+        <Property Name="Density" Value="0.000283" Unit="kip/in^3"/>
+        <Property Name="Alpha"   Value="9.9e-06"  Unit="/F"/>
+        <Property Name="Damp"    Value="0.03"     Unit=""/>
+        <Property Name="Fy"      Value="36"       Unit="kip/in^2"/>
+        <Property Name="Fu"      Value="58"       Unit="kip/in^2"/>
+        <Property Name="Ry"      Value="0.0"      Unit=""/>
+        <Property Name="Rt"      Value="0.0"      Unit=""/>
+        <Property Name="Fcu"     Value="0.0"      Unit="kip/in^2"/>
+      </Properties>
+    </Material>
+    <Material BaseUnit="Metric">
+      <Name>StainlessSteel</Name>
+      <Type>STEEL</Type>
+      <Properties>
+        <Property Name="E"       Value="197.93e6"  Unit="kN/m^2"/>
+        <Property Name="Poisson" Value="0.3"       Unit=""/>
+        <Property Name="Density" Value="76.819541" Unit="kN/m^3"/>
+        <Property Name="Alpha"   Value="18.0e-6"   Unit="/C"/>
+        <Property Name="Damp"    Value="0.03"      Unit=""/>
+        <Property Name="Fy"      Value="250000"    Unit="kN/m^2"/>
+        <Property Name="Fu"      Value="400000"    Unit="kN/m^2"/>
+        <Property Name="Ry"      Value="0.0"       Unit=""/>
+        <Property Name="Rt"      Value="0.0"       Unit=""/>
+        <Property Name="Fcu"     Value="0.0"       Unit="kN/m^2"/>
+      </Properties>
+    </Material>
+
+    <Material BaseUnit="English">
+      <Name>STEEL_36_ksi</Name>
+      <Type>STEEL</Type>
+      <Properties>
+        <Property Name="E"       Value="29000"     Unit="kip/in^2"/>
+        <Property Name="G"       Value="11200"     Unit="kip/in^2"/>
+        <Property Name="Poisson" Value="0.30"      Unit=""/>
+        <Property Name="Density" Value="0.000283"  Unit="kip/in^3"/>
+        <Property Name="Alpha"   Value="0.0000065" Unit="/F"/>
+        <Property Name="Damp"    Value="0.03"      Unit=""/>
+        <Property Name="Fy"      Value="36"        Unit="kip/in^2"/>
+        <Property Name="Fu"      Value="58"        Unit="kip/in^2"/>
+        <Property Name="Ry"      Value="1.5"       Unit=""/>
+        <Property Name="Rt"      Value="1.2"       Unit=""/>
+        <Property Name="Fcu"     Value="0.0"       Unit="kip/in^2"/>
+      </Properties>
+    </Material>
+    <Material BaseUnit="Metric">
+      <Name>STEEL_36_ksi</Name>
+      <Type>STEEL</Type>
+      <Properties>
+        <Property Name="E"       Value="199947961.502171" Unit="kN/m^2"/>
+        <Property Name="G"       Value="77221281.683597"  Unit="kN/m^2"/>
+        <Property Name="Poisson" Value="0.3"              Unit=""/>
+        <Property Name="Density" Value="76.8195511458057" Unit="kN/m^3"/>
+        <Property Name="Alpha"   Value="0.0000117"        Unit="/C"/>
+        <Property Name="Damp"    Value="0.03"             Unit=""/>
+        <Property Name="Fy"      Value="248211.262554419" Unit="kN/m^2"/>
+        <Property Name="Fu"      Value="399895.923004342" Unit="kN/m^2"/>
+        <Property Name="Ry"      Value="1.5"              Unit=""/>
+        <Property Name="Rt"      Value="1.2"              Unit=""/>
+        <Property Name="Fcu"     Value="0.0"              Unit="kN/m^2"/>
+      </Properties>
+    </Material>
+
+    <Material BaseUnit="English">
+      <Name>STEEL_50_ksi</Name>
+      <Type>STEEL</Type>
+      <Properties>
+        <Property Name="E"       Value="29000"     Unit="kip/in^2"/>
+        <Property Name="G"       Value="11200"     Unit="kip/in^2"/>
+        <Property Name="Poisson" Value="0.3"       Unit=""/>
+        <Property Name="Density" Value="0.000283"  Unit="kip/in^3"/>
+        <Property Name="Alpha"   Value="0.0000065" Unit="/F"/>
+        <Property Name="Damp"    Value="0.03"      Unit=""/>
+        <Property Name="Fy"      Value="50"        Unit="kip/in^2"/>
+        <Property Name="Fu"      Value="62"        Unit="kip/in^2"/>
+        <Property Name="Ry"      Value="1.5"       Unit=""/>
+        <Property Name="Rt"      Value="1.2"       Unit=""/>
+        <Property Name="Fcu"     Value="0.0"       Unit="kip/in^2"/>
+      </Properties>
+    </Material>
+    <Material BaseUnit="Metric">
+      <Name>STEEL_50_ksi</Name>
+      <Type>STEEL</Type>
+      <Properties>
+        <Property Name="E"       Value="199947961.502171" Unit="kN/m^2"/>
+        <Property Name="G"       Value="77221281.683597"  Unit="kN/m^2"/>
+        <Property Name="Poisson" Value="0.3"              Unit=""/>
+        <Property Name="Density" Value="76.8195511458057" Unit="kN/m^3"/>
+        <Property Name="Alpha"   Value="0.0000117"        Unit="/C"/>
+        <Property Name="Damp"    Value="0.03"             Unit=""/>
+        <Property Name="Fy"      Value="344737.864658915" Unit="kN/m^2"/>
+        <Property Name="Fu"      Value="427474.952177055" Unit="kN/m^2"/>
+        <Property Name="Ry"      Value="1.5"              Unit=""/>
+        <Property Name="Rt"      Value="1.2"              Unit=""/>
+        <Property Name="Fcu"     Value="0.0"              Unit="kN/m^2"/>
+      </Properties>
+    </Material>
+
+    <Material BaseUnit="English">
+      <Name>STEEL_275_Nmm2</Name>
+      <Type>STEEL</Type>
+      <Properties>
+        <Property Name="E"       Value="29732.73623465"       Unit="kip/in^2"/>
+        <Property Name="G"       Value="11435.6677825577"     Unit="kip/in^2"/>
+        <Property Name="Poisson" Value="0.3"                  Unit=""/>
+        <Property Name="Density" Value="0.000283664766"       Unit="kip/in^3"/>
+        <Property Name="Alpha"   Value="6.66666666666667E-06" Unit="/F"/>
+        <Property Name="Damp"    Value="0.03"                 Unit=""/>
+        <Property Name="Fy"      Value="39.88537787575"       Unit="kip/in^2"/>
+        <Property Name="Fu"      Value="59.4654724693"        Unit="kip/in^2"/>
+        <Property Name="Ry"      Value="1.5"                  Unit=""/>
+        <Property Name="Rt"      Value="1.2"                  Unit=""/>
+        <Property Name="Fcu"     Value="0.0"                  Unit="kip/in^2"/>
+      </Properties>
+    </Material>
+    <Material BaseUnit="Metric">
+      <Name>STEEL_275_Nmm2</Name>
+      <Type>STEEL</Type>
+      <Properties>
+        <Property Name="E"       Value="205000000"        Unit="kN/m^2"/>
+        <Property Name="G"       Value="78846153.8461538" Unit="kN/m^2"/>
+        <Property Name="Poisson" Value="0.3"              Unit=""/>
+        <Property Name="Density" Value="77"               Unit="kN/m^3"/>
+        <Property Name="Alpha"   Value="0.000012"         Unit="/C"/>
+        <Property Name="Damp"    Value="0.03"             Unit=""/>
+        <Property Name="Fy"      Value="275000"           Unit="kN/m^2"/>
+        <Property Name="Fu"      Value="410000"           Unit="kN/m^2"/>
+        <Property Name="Ry"      Value="1.5"              Unit=""/>
+        <Property Name="Rt"      Value="1.2"              Unit=""/>
+        <Property Name="Fcu"     Value="0.0"              Unit="kN/m^2"/>
+      </Properties>
+    </Material>
+
+    <Material BaseUnit="English">
+      <Name>STEEL_355_Nmm2</Name>
+      <Type>STEEL</Type>
+      <Properties>
+        <Property Name="E"       Value="29732.73623465"       Unit="kip/in^2"/>
+        <Property Name="G"       Value="11435.6677825577"     Unit="kip/in^2"/>
+        <Property Name="Poisson" Value="0.3"                  Unit=""/>
+        <Property Name="Density" Value="0.000283664766"       Unit="kip/in^3"/>
+        <Property Name="Alpha"   Value="6.66666666666667E-06" Unit="/F"/>
+        <Property Name="Damp"    Value="0.03"                 Unit=""/>
+        <Property Name="Fy"      Value="51.48839689415"       Unit="kip/in^2"/>
+        <Property Name="Fu"      Value="68.1677367331"        Unit="kip/in^2"/>
+        <Property Name="Ry"      Value="1.5"                  Unit=""/>
+        <Property Name="Rt"      Value="1.2"                  Unit=""/>
+        <Property Name="Fcu"     Value="0.0"                  Unit="kip/in^2"/>
+      </Properties>
+    </Material>
+    <Material BaseUnit="Metric">
+      <Name>STEEL_355_Nmm2</Name>
+      <Type>STEEL</Type>
+      <Properties>
+        <Property Name="E"       Value="205000000"        Unit="kN/m^2"/>
+        <Property Name="G"       Value="78846153.8461538" Unit="kN/m^2"/>
+        <Property Name="Poisson" Value="0.3"              Unit=""/>
+        <Property Name="Density" Value="77"               Unit="kN/m^3"/>
+        <Property Name="Alpha"   Value="0.000012"         Unit="/C"/>
+        <Property Name="Damp"    Value="0.03"             Unit=""/>
+        <Property Name="Fy"      Value="355000"           Unit="kN/m^2"/>
+        <Property Name="Fu"      Value="470000"           Unit="kN/m^2"/>
+        <Property Name="Ry"      Value="1.5"              Unit=""/>
+        <Property Name="Rt"      Value="1.2"              Unit=""/>
+        <Property Name="Fcu"     Value="0.0"              Unit="kN/m^2"/>
+      </Properties>
+    </Material>
+  </Materials>
+</MaterialDatabaseInfo>
